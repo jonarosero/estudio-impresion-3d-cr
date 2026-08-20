@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Box, HeartHandshake, Layers3, MessageCircle } from "lucide-react";
+import { HeroBanner } from "@/components/hero-banner";
 import { ProductCard } from "@/components/product-card";
 import { categories, products } from "@/lib/data";
 
@@ -34,26 +34,7 @@ export default function Home() {
               <span>Hecho en pequenos lotes<br />con materiales responsables</span>
             </div>
           </div>
-          <div className="relative min-h-[390px] lg:min-h-full">
-            <Image
-              src="https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=1600&q=90"
-              alt="Objetos decorativos en un interior sereno"
-              fill
-              priority
-              sizes="(max-width: 1024px) 100vw, 55vw"
-              className="object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#ead7dc]/25 via-transparent to-transparent" />
-            <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between rounded-2xl bg-[#fffdfb]/85 p-4 backdrop-blur-xl sm:bottom-8 sm:left-8 sm:right-auto sm:w-[310px]">
-              <div>
-                <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#9e5f72]">Pieza destacada</p>
-                <p className="mt-1 font-display text-xl font-semibold">Florero Pliegue</p>
-              </div>
-              <Link href="/producto/florero-pliegue" className="grid size-11 place-items-center rounded-full bg-[#35282d] text-white" aria-label="Ver Florero Pliegue">
-                <ArrowRight size={17} />
-              </Link>
-            </div>
-          </div>
+          <HeroBanner />
         </div>
       </section>
 

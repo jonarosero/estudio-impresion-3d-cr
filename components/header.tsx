@@ -21,50 +21,49 @@ export function Header() {
 
   return (
     <>
-      <div className="bg-[#35282d] px-4 py-2 text-center text-[11px] font-semibold tracking-wide text-white">
-        Piezas hechas en Ecuador · Entregas nacionales
-      </div>
       <header className="sticky top-0 z-40 border-b border-[#e5d8dc]/80 bg-[#fffdfb]/90 backdrop-blur-xl">
-        <div className="page-shell flex h-[76px] items-center justify-between">
+        <div className="page-shell grid h-[76px] grid-cols-[1fr_auto_1fr] items-center">
           <button
-            className="focus-ring rounded-lg p-2 lg:hidden"
+            className="focus-ring justify-self-start rounded-lg p-2 lg:hidden"
             onClick={() => setMobileOpen(true)}
             aria-label="Abrir menu"
           >
             <Menu size={21} />
           </button>
-          <nav className="hidden items-center gap-7 lg:flex" aria-label="Navegacion principal">
+          <nav className="hidden items-center gap-7 justify-self-start lg:flex" aria-label="Navegacion principal">
             {links.slice(0, 2).map((link) => (
               <Link key={link.href} href={link.href} className="focus-ring rounded text-xs font-semibold hover:text-[#9e5f72]">
                 {link.label}
               </Link>
             ))}
           </nav>
-          <div className="lg:absolute lg:left-1/2 lg:-translate-x-1/2">
+          <div className="justify-self-center px-3">
             <Logo />
           </div>
-          <nav className="hidden items-center gap-7 lg:flex" aria-label="Navegacion secundaria">
-            {links.slice(2).map((link) => (
-              <Link key={link.href} href={link.href} className="focus-ring rounded text-xs font-semibold hover:text-[#9e5f72]">
-                {link.label}
+          <div className="flex items-center justify-self-end gap-6">
+            <nav className="hidden items-center gap-7 xl:flex" aria-label="Navegacion secundaria">
+              {links.slice(2).map((link) => (
+                <Link key={link.href} href={link.href} className="focus-ring whitespace-nowrap rounded text-xs font-semibold hover:text-[#9e5f72]">
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+            <div className="flex items-center gap-1">
+              <Link href="/catalogo" className="focus-ring hidden rounded-full p-2.5 hover:bg-[#f3e7e9] sm:block" aria-label="Buscar">
+                <Search size={19} />
               </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-1">
-            <Link href="/catalogo" className="focus-ring hidden rounded-full p-2.5 hover:bg-[#f3e7e9] sm:block" aria-label="Buscar">
-              <Search size={19} />
-            </Link>
-            <Link href="/login" className="focus-ring hidden rounded-full p-2.5 hover:bg-[#f3e7e9] sm:block" aria-label="Mi cuenta">
-              <UserRound size={19} />
-            </Link>
-            <button onClick={openCart} className="focus-ring relative rounded-full p-2.5 hover:bg-[#f3e7e9]" aria-label={`Carrito con ${count} productos`}>
-              <ShoppingBag size={19} />
-              {count > 0 && (
-                <span className="absolute right-0 top-0 grid size-[18px] place-items-center rounded-full bg-[#9e5f72] text-[9px] font-bold text-white">
-                  {count}
-                </span>
-              )}
-            </button>
+              <Link href="/login" className="focus-ring hidden rounded-full p-2.5 hover:bg-[#f3e7e9] sm:block" aria-label="Mi cuenta">
+                <UserRound size={19} />
+              </Link>
+              <button onClick={openCart} className="focus-ring relative rounded-full p-2.5 hover:bg-[#f3e7e9]" aria-label={`Carrito con ${count} productos`}>
+                <ShoppingBag size={19} />
+                {count > 0 && (
+                  <span className="absolute right-0 top-0 grid size-[18px] place-items-center rounded-full bg-[#9e5f72] text-[9px] font-bold text-white">
+                    {count}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </header>
