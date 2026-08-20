@@ -1,4 +1,4 @@
-# Estudio de Impresion 3D C&R
+# Estudio de Impresion 3D J&J
 
 Prototipo responsive de una tienda de objetos impresos en 3D con catalogo, carrito persistente, cotizaciones por mensajeria interna y dashboard administrativo.
 

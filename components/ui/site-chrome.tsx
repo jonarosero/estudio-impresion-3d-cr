@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { CartDrawer } from "@/components/cart-drawer";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
+import { Suspense } from "react";
+import { CartDrawer } from "@/components/cart/cart-drawer";
+import { Footer } from "@/components/ui/footer";
+import { Header } from "@/components/ui/header";
 
 export function SiteChrome({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -14,7 +15,7 @@ export function SiteChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <Header />
+      <Suspense fallback={<div className="h-[77px] border-b border-[#e5d8dc]/80" />}><Header /></Suspense>
       <CartDrawer />
       {children}
       <Footer />

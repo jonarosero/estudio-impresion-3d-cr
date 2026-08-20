@@ -1,4 +1,4 @@
-import { CustomQuoteForm } from "@/components/custom-quote-form";
+import { CustomQuoteForm } from "@/components/quotes/custom-quote-form";
 
 export const metadata = { title: "Impresiones personalizadas" };
 

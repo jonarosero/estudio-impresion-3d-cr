@@ -7,6 +7,21 @@ export type CategoryId =
 
 export type ProductFinish = "standard" | "hand-painted" | "ready-to-paint";
 
+export type ProductColor = {
+  name: string;
+  type: "matte" | "marble" | "multicolor";
+  price: number;
+  image: string;
+};
+
+export type ProductFinishOption = {
+  id: ProductFinish;
+  title: string;
+  description: string;
+  priceAdjustment: number;
+  image: string;
+};
+
 export type Product = {
   id: string;
   slug: string;
@@ -18,8 +33,10 @@ export type Product = {
   compareAtPrice?: number;
   image: string;
   colors: string[];
+  colorVariants?: ProductColor[];
   colorPresentation?: "single" | "multicolor";
   availableFinishes?: ProductFinish[];
+  finishOptions?: ProductFinishOption[];
   badge?: string;
   featured?: boolean;
   stock: number;

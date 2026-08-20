@@ -1,4 +1,4 @@
-import { CheckoutView } from "@/components/checkout-view";
+import { CheckoutView } from "@/components/checkout/checkout-view";
 
 export const metadata = { title: "Finalizar compra" };
 

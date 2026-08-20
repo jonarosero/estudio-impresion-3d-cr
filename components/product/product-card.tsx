@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Heart } from "lucide-react";
-import { AddToCart } from "@/components/add-to-cart";
+import { AddToCart } from "@/components/cart/add-to-cart";
 import { categories, formatPrice } from "@/lib/data";
 import type { Product } from "@/lib/types";
 

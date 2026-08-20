@@ -1,4 +1,4 @@
-# Plan de construccion - Estudio de Impresion 3D C&R
+# Plan de construccion - Estudio de Impresion 3D J&J
 
 ## Objetivo
 

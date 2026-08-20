@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { CatalogView } from "@/components/catalog-view";
+import { CatalogView } from "@/components/catalog/catalog-view";
 
-export const metadata = { title: "Catalogo" };
+export const metadata = { title: "Catálogo" };
 
 export default function CatalogPage() {
   return (

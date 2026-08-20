@@ -26,6 +26,6 @@ export const useProductStore = create<ProductState>()(
         })),
       remove: (id) => set((state) => ({ products: state.products.filter((item) => item.id !== id) })),
     }),
-    { name: "cr-admin-products" },
+    { name: "jj-admin-products-v2" },
   ),
 );

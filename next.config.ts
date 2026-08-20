@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "https",
+        hostname: "mcp-tools-z-image-turbo.hf.space",
+      },
     ],
   },
 };

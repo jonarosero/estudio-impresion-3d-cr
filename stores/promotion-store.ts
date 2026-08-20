@@ -19,14 +19,14 @@ export type Promotion = {
 const initialPromotions: Promotion[] = [
   {
     id: "welcome",
-    title: "Bienvenida C&R",
+    title: "Bienvenida J&J",
     message: "10% para descubrir tu primera pieza.",
     code: "HOLA10",
     value: "10%",
     productName: "Maceta Onda",
     productSlug: "maceta-onda",
     productPrice: 18.5,
-    image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=1600&q=90",
+    image: "https://mcp-tools-z-image-turbo.hf.space/--replicas/hjjmt/gradio_api/file=/tmp/gradio/a37134125379cc2806527617cf2d12cee3cefb23b8f9f4bfcbb7ffc098debca2/image.webp",
     active: true,
   },
   {
@@ -38,12 +38,12 @@ const initialPromotions: Promotion[] = [
     productName: "Florero Pliegue",
     productSlug: "florero-pliegue",
     productPrice: 24,
-    image: "https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=1600&q=90",
+    image: "https://mcp-tools-z-image-turbo.hf.space/--replicas/hjjmt/gradio_api/file=/tmp/gradio/a37134125379cc2806527617cf2d12cee3cefb23b8f9f4bfcbb7ffc098debca2/image.webp",
     active: true,
   },
   {
     id: "shipping",
-    title: "Envio especial",
+    title: "Envío especial",
     message: "Entrega nacional a precio reducido.",
     code: "ENVIOCR",
     value: "$3,50",

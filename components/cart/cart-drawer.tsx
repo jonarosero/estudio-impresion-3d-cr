@@ -17,7 +17,7 @@ export function CartDrawer() {
       <aside className="ml-auto flex h-full w-full max-w-md flex-col bg-[#fffdfb] p-5 sm:p-7" onClick={(event) => event.stopPropagation()} aria-label="Carrito de compras">
         <div className="flex items-center justify-between border-b border-[#e5d8dc] pb-5">
           <div>
-            <p className="eyebrow">Tu seleccion</p>
+            <p className="eyebrow">Tu selección</p>
             <h2 className="mt-1 font-display text-3xl font-semibold">Carrito</h2>
           </div>
           <button onClick={close} className="focus-ring rounded-full border border-[#e5d8dc] p-2.5" aria-label="Cerrar carrito">
@@ -30,10 +30,10 @@ export function CartDrawer() {
               <span className="mx-auto grid size-16 place-items-center rounded-full bg-[#f3e7e9] text-[#9e5f72]">
                 <ShoppingBag size={24} />
               </span>
-              <h3 className="mt-5 font-display text-2xl font-semibold">Tu carrito esta esperando</h3>
+              <h3 className="mt-5 font-display text-2xl font-semibold">Tu carrito está esperando</h3>
               <p className="mt-2 text-sm text-[#786970]">Encuentra una pieza que se sienta hecha para ti.</p>
               <Link href="/catalogo" onClick={close} className="mt-6 inline-block rounded-full bg-[#35282d] px-6 py-3 text-sm font-bold text-white">
-                Explorar coleccion
+                Explorar colección
               </Link>
             </div>
           </div>

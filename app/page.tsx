@@ -1,15 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Music2, Play, Sparkles } from "lucide-react";
-import { HeroBanner } from "@/components/hero-banner";
-import { ProductCard } from "@/components/product-card";
+import { ArrowRight } from "lucide-react";
+import { HeroBanner } from "@/components/marketing/hero-banner";
+import { ProductCard } from "@/components/product/product-card";
+import { TiktokShowcase } from "@/components/marketing/tiktok-showcase";
 import { categories, products } from "@/lib/data";
 
 export default function Home() {
-  const tiktokUrl = process.env.NEXT_PUBLIC_TIKTOK_URL || "https://www.tiktok.com/@estudio3dcr";
   return (
     <main>
-      <section className="page-shell pt-5 sm:pt-8">
+      <section className="bg-[#f8f0f2]"><div className="page-shell pb-10 pt-5 sm:pb-14 sm:pt-8">
         <div className="grid min-h-[610px] overflow-hidden rounded-[30px] bg-[#ead7dc] lg:grid-cols-[1.02fr_1.18fr]">
           <div className="relative z-10 flex flex-col justify-center px-7 py-12 sm:px-12 lg:px-16">
             <p className="eyebrow">Objetos que cuentan algo</p>
@@ -17,14 +17,14 @@ export default function Home() {
               Ideas que toman <span className="italic text-[#9e5f72]">forma.</span>
             </h1>
             <p className="mt-8 max-w-md text-sm leading-7 text-[#66575d] sm:text-base">
-              Disenamos objetos impresos en 3D para darle personalidad, orden y una pequena alegria a tus espacios.
+              Diseñamos objetos impresos en 3D para darle personalidad, orden y una pequeña alegría a tus espacios.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link href="/catalogo" className="focus-ring inline-flex items-center gap-3 rounded-full bg-[#35282d] px-7 py-4 text-sm font-bold text-white transition hover:-translate-y-0.5">
-                Ver coleccion <ArrowRight size={16} />
+                Ver colección <ArrowRight size={16} />
               </Link>
               <Link href="/personalizados" className="focus-ring inline-flex items-center rounded-full border border-[#b9959f] px-7 py-4 text-sm font-bold hover:bg-[#fffdfb]/50">
-                Crear algo unico
+                Crear algo único
               </Link>
             </div>
             <div className="mt-12 flex items-center gap-4 text-[11px] font-semibold text-[#66575d]">
@@ -33,28 +33,28 @@ export default function Home() {
                   <span key={color} className="size-8 rounded-full border-2 border-[#ead7dc]" style={{ backgroundColor: color }} />
                 ))}
               </div>
-              <span>Hecho en pequenos lotes<br />con materiales responsables</span>
+              <span>Hecho en pequeños lotes<br />con materiales responsables</span>
             </div>
           </div>
           <HeroBanner />
         </div>
-      </section>
+      </div></section>
 
-      <section className="page-shell py-20 sm:py-28">
+      <section className="bg-[#f4e9ec]"><div className="page-shell py-14 sm:py-20">
         <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
-            <p className="eyebrow">Para cada rincon</p>
+            <p className="eyebrow">Para cada rincón</p>
             <h2 className="mt-3 font-display text-4xl font-semibold tracking-tight sm:text-6xl">Explora a tu manera</h2>
           </div>
           <Link href="/catalogo" className="focus-ring inline-flex items-center gap-2 self-start rounded text-xs font-extrabold uppercase tracking-wider text-[#9e5f72]">
-            Todo el catalogo <ArrowRight size={14} />
+            Todo el catálogo <ArrowRight size={14} />
           </Link>
         </div>
         <div className="mt-10 grid grid-cols-2 gap-3 md:grid-cols-5">
           {categories.map((category, index) => (
             <Link
               key={category.id}
-              href={category.id === "personalizadas" ? "/personalizados" : `/catalogo?categoria=${category.id}`}
+                href={category.id === "personalizadas" ? "/personalizados" : `/catalogo?categoria=${category.id}`}
               className={`group relative flex min-h-[190px] flex-col justify-between overflow-hidden rounded-[24px] border border-[#e5d8dc] p-5 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-[#9e5f72]/10 ${index === 4 ? "col-span-2 bg-[#35282d] text-white md:col-span-1" : "bg-[#fffdfb]"}`}
             >
               <span className={`font-display text-5xl font-semibold ${index === 4 ? "text-white/15" : "text-[#ead7dc]"}`}>0{index + 1}</span>
@@ -66,12 +66,12 @@ export default function Home() {
             </Link>
           ))}
         </div>
-      </section>
+      </div></section>
 
       <section className="bg-[#fffdfb] py-20 sm:py-28">
         <div className="page-shell">
           <div className="text-center">
-            <p className="eyebrow">Los mas queridos</p>
+            <p className="eyebrow">Los más queridos</p>
             <h2 className="mt-3 font-display text-4xl font-semibold sm:text-6xl">Piezas con personalidad</h2>
             <p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-[#786970]">Formas amables, texturas sutiles y colores pensados para convivir contigo.</p>
           </div>
@@ -81,14 +81,15 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="proceso" className="page-shell py-20 sm:py-28">
+      <TiktokShowcase />
+      {/* <section id="proceso" className="page-shell py-20 sm:py-28">
         <div className="grid overflow-hidden rounded-[30px] bg-[#35282d] text-white lg:grid-cols-[.9fr_1.1fr]">
           <div className="relative flex flex-col justify-center p-8 sm:p-14 lg:p-16">
             <Music2 className="absolute right-8 top-8 size-28 rotate-12 text-[#eccbd3]/10" strokeWidth={1} />
-            <p className="eyebrow !text-[#eccbd3]">Detras de cada capa</p>
-            <h2 className="mt-4 max-w-lg font-display text-5xl font-semibold leading-[0.92] sm:text-7xl">Mira como nacen nuestras piezas.</h2>
-            <p className="mt-6 max-w-md text-sm leading-7 text-white/60">En TikTok compartimos el proceso de impresion, pruebas de color, acabados y modelos nuevos antes de que lleguen a la tienda.</p>
-            <div className="mt-9 flex flex-wrap gap-3"><a href={tiktokUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[#eccbd3] px-6 py-3.5 text-sm font-bold text-[#35282d]"><Music2 size={16} /> Siguenos en TikTok</a><Link href="/personalizados" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3.5 text-sm font-bold">Proponer una idea <ArrowRight size={15} /></Link></div>
+            <p className="eyebrow !text-[#eccbd3]">Detrás de cada capa</p>
+            <h2 className="mt-4 max-w-lg font-display text-5xl font-semibold leading-[0.92] sm:text-7xl">Mira cómo nacen nuestras piezas.</h2>
+            <p className="mt-6 max-w-md text-sm leading-7 text-white/60">En TikTok compartimos el proceso de impresión, pruebas de color, acabados y modelos nuevos antes de que lleguen a la tienda.</p>
+            <div className="mt-9 flex flex-wrap gap-3"><a href={tiktokUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[#eccbd3] px-6 py-3.5 text-sm font-bold text-[#35282d]"><Music2 size={16} /> Síguenos en TikTok</a><Link href="/personalizados" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3.5 text-sm font-bold">Proponer una idea <ArrowRight size={15} /></Link></div>
             <div className="mt-10 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-white/35"><Sparkles size={14} className="text-[#eccbd3]" /> Nuevos videos cada semana</div>
           </div>
           <div className="grid grid-cols-3 gap-2 border-t border-white/10 bg-white/5 p-4 sm:gap-4 sm:p-7 lg:border-l lg:border-t-0">
@@ -106,16 +107,16 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
-      <section className="page-shell pb-2 sm:pb-8">
-        <div className="grid overflow-hidden rounded-[30px] bg-[#ead7dc] lg:grid-cols-[.85fr_1.15fr]">
+      <section className="bg-[#fffdfb]"><div className="page-shell py-12 sm:py-16">
+        <div className="grid overflow-hidden rounded-[30px] border border-[#e5d8dc] bg-white lg:grid-cols-[.85fr_1.15fr]">
           <div className="flex flex-col justify-center p-8 sm:p-12 lg:p-16">
             <p className="eyebrow">Hecho a tu medida</p>
-            <h2 className="mt-4 font-display text-5xl font-semibold leading-[0.92] sm:text-6xl">Tu idea tambien puede tomar forma.</h2>
+            <h2 className="mt-4 font-display text-5xl font-semibold leading-[0.92] sm:text-6xl">Tu idea también puede tomar forma.</h2>
             <p className="mt-6 max-w-md text-sm leading-7 text-[#66575d]">Desde letreros y recuerdos hasta organizadores hechos para un espacio exacto. Estas son algunas de las piezas personalizadas que hemos creado.</p>
             <Link href="/personalizados" className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-[#35282d] px-6 py-3.5 text-sm font-bold text-white">Crear una pieza personalizada <ArrowRight size={15} /></Link>
-            <p className="mt-5 text-[10px] leading-5 text-[#786970]">Envia referencias, medidas y color. Te responderemos dentro de una conversacion privada.</p>
+            <p className="mt-5 text-[10px] leading-5 text-[#786970]">Envía referencias, medidas y color. Te responderemos dentro de una conversación privada.</p>
           </div>
           <div className="grid grid-cols-2 gap-3 p-4 sm:gap-5 sm:p-7">
             {[
@@ -131,7 +132,7 @@ export default function Home() {
             ))}
           </div>
         </div>
-      </section>
+      </div></section>
     </main>
   );
 }

@@ -9,7 +9,7 @@ export function isLocalFreeShipping(city: string) {
 
 export function getShippingRule(subtotal: number, city: string) {
   if (subtotal >= FREE_SHIPPING_MINIMUM) {
-    return { free: true, reason: "Compra de $60 o mas" };
+    return { free: true, reason: "Compra de $60 o más" };
   }
   if (isLocalFreeShipping(city)) {
     return { free: true, reason: "Entrega local en Santa Elena" };

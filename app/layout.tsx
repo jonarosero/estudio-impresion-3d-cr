@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
-import { SiteChrome } from "@/components/site-chrome";
+import { SiteChrome } from "@/components/ui/site-chrome";
 
 const display = Cormorant_Garamond({
   subsets: ["latin"],
@@ -16,8 +16,8 @@ const sans = Manrope({
 
 export const metadata: Metadata = {
   title: {
-    default: "Estudio de Impresion 3D C&R",
-    template: "%s | C&R",
+    default: "Estudio de Impresión 3D J&J",
+    template: "%s | J&J",
   },
   description: "Objetos impresos en 3D, creados con calma para espacios con personalidad.",
 };

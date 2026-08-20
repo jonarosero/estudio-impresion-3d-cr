@@ -48,7 +48,7 @@ const demoQuotes: Quote[] = [
     images: [],
     messages: [
       { id: "m1", sender: "customer", text: "Quisiera separar las brochas de los labiales.", createdAt: "Ayer, 10:15" },
-      { id: "m2", sender: "admin", text: "Podemos hacerlo en tres modulos por $32. Te envio la propuesta.", createdAt: "Ayer, 11:02" },
+      { id: "m2", sender: "admin", text: "Podemos hacerlo en tres módulos por $32. Te envío la propuesta.", createdAt: "Ayer, 11:02" },
     ],
     createdAt: "Ayer",
     expiresAt: "17 sep 2026",
