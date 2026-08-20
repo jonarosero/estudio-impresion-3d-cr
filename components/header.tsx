@@ -7,8 +7,10 @@ import { Logo } from "@/components/logo";
 import { useCartStore } from "@/stores/cart-store";
 
 const links = [
-  { href: "/catalogo", label: "Catalogo" },
-  { href: "/catalogo?categoria=macetas", label: "Colecciones" },
+  { href: "/catalogo?categoria=macetas", label: "Macetas" },
+  { href: "/catalogo?categoria=hogar", label: "Hogar" },
+  { href: "/catalogo?categoria=organizadores", label: "Organizadores" },
+  { href: "/catalogo?categoria=figuritas", label: "Figuritas" },
   { href: "/personalizados", label: "Personalizados" },
   { href: "/#proceso", label: "Como lo hacemos" },
 ];
@@ -30,9 +32,9 @@ export function Header() {
           >
             <Menu size={21} />
           </button>
-          <nav className="hidden items-center gap-7 justify-self-start lg:flex" aria-label="Navegacion principal">
-            {links.slice(0, 2).map((link) => (
-              <Link key={link.href} href={link.href} className="focus-ring rounded text-xs font-semibold hover:text-[#9e5f72]">
+          <nav className="hidden items-center gap-4 justify-self-start lg:flex" aria-label="Categorias">
+            {links.slice(0, 4).map((link) => (
+              <Link key={link.href} href={link.href} className="focus-ring whitespace-nowrap rounded text-[11px] font-semibold hover:text-[#9e5f72]">
                 {link.label}
               </Link>
             ))}
@@ -41,9 +43,9 @@ export function Header() {
             <Logo />
           </div>
           <div className="flex items-center justify-self-end gap-6">
-            <nav className="hidden items-center gap-7 xl:flex" aria-label="Navegacion secundaria">
-              {links.slice(2).map((link) => (
-                <Link key={link.href} href={link.href} className="focus-ring whitespace-nowrap rounded text-xs font-semibold hover:text-[#9e5f72]">
+            <nav className="hidden items-center gap-5 xl:flex" aria-label="Navegacion secundaria">
+              {links.slice(4).map((link) => (
+                <Link key={link.href} href={link.href} className="focus-ring whitespace-nowrap rounded text-[11px] font-semibold hover:text-[#9e5f72]">
                   {link.label}
                 </Link>
               ))}

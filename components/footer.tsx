@@ -18,6 +18,7 @@ export function Footer() {
             <Link href="/catalogo">Todos los productos</Link>
             <Link href="/personalizados">Pide algo unico</Link>
             <Link href="/login">Mi cuenta</Link>
+            <Link href="/privacidad">Proteccion de datos</Link>
             <Link href="/dashboard">Administracion</Link>
           </div>
         </div>
