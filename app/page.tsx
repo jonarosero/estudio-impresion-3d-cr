@@ -1,10 +1,12 @@
+import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Box, HeartHandshake, Layers3, MessageCircle } from "lucide-react";
+import { ArrowRight, Music2, Play, Sparkles } from "lucide-react";
 import { HeroBanner } from "@/components/hero-banner";
 import { ProductCard } from "@/components/product-card";
 import { categories, products } from "@/lib/data";
 
 export default function Home() {
+  const tiktokUrl = process.env.NEXT_PUBLIC_TIKTOK_URL || "https://www.tiktok.com/@estudio3dcr";
   return (
     <main>
       <section className="page-shell pt-5 sm:pt-8">
@@ -80,38 +82,29 @@ export default function Home() {
       </section>
 
       <section id="proceso" className="page-shell py-20 sm:py-28">
-        <div className="grid overflow-hidden rounded-[30px] bg-[#35282d] text-white lg:grid-cols-[1fr_1.05fr]">
-          <div className="p-8 sm:p-14 lg:p-16">
-            <p className="eyebrow !text-[#eccbd3]">Nuestro proceso</p>
-            <h2 className="mt-4 max-w-lg font-display text-5xl font-semibold leading-[0.95] sm:text-6xl">De una linea digital a un objeto real.</h2>
-            <p className="mt-6 max-w-md text-sm leading-7 text-white/60">Cada pieza se prepara, imprime y termina en nuestro estudio. Sin produccion masiva, sin prisa innecesaria.</p>
-            <Link href="/personalizados" className="mt-9 inline-flex items-center gap-2 rounded-full bg-[#eccbd3] px-6 py-3.5 text-sm font-bold text-[#35282d]">
-              Cuéntanos tu idea <ArrowRight size={15} />
-            </Link>
+        <div className="grid overflow-hidden rounded-[30px] bg-[#35282d] text-white lg:grid-cols-[.9fr_1.1fr]">
+          <div className="relative flex flex-col justify-center p-8 sm:p-14 lg:p-16">
+            <Music2 className="absolute right-8 top-8 size-28 rotate-12 text-[#eccbd3]/10" strokeWidth={1} />
+            <p className="eyebrow !text-[#eccbd3]">Detras de cada capa</p>
+            <h2 className="mt-4 max-w-lg font-display text-5xl font-semibold leading-[0.92] sm:text-7xl">Mira como nacen nuestras piezas.</h2>
+            <p className="mt-6 max-w-md text-sm leading-7 text-white/60">En TikTok compartimos el proceso de impresion, pruebas de color, acabados y modelos nuevos antes de que lleguen a la tienda.</p>
+            <div className="mt-9 flex flex-wrap gap-3"><a href={tiktokUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[#eccbd3] px-6 py-3.5 text-sm font-bold text-[#35282d]"><Music2 size={16} /> Siguenos en TikTok</a><Link href="/personalizados" className="inline-flex items-center gap-2 rounded-full border border-white/20 px-6 py-3.5 text-sm font-bold">Proponer una idea <ArrowRight size={15} /></Link></div>
+            <div className="mt-10 flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-white/35"><Sparkles size={14} className="text-[#eccbd3]" /> Nuevos videos cada semana</div>
           </div>
-          <div className="grid divide-y divide-white/10 border-t border-white/10 lg:border-l lg:border-t-0">
+          <div className="grid grid-cols-3 gap-2 border-t border-white/10 bg-white/5 p-4 sm:gap-4 sm:p-7 lg:border-l lg:border-t-0">
             {[
-              { icon: MessageCircle, number: "01", title: "Conversamos", text: "Entendemos la pieza, su uso, medidas y el color que imaginas." },
-              { icon: Layers3, number: "02", title: "Creamos capa a capa", text: "Ajustamos el modelo y elegimos una impresion limpia y resistente." },
-              { icon: HeartHandshake, number: "03", title: "Terminamos a mano", text: "Revisamos cada detalle antes de entregarlo listo para disfrutar." },
-            ].map((step) => (
-              <div key={step.number} className="grid grid-cols-[48px_1fr_auto] items-center gap-4 p-7 sm:p-9">
-                <span className="grid size-12 place-items-center rounded-full bg-white/10 text-[#eccbd3]"><step.icon size={20} /></span>
-                <div><h3 className="font-display text-2xl font-semibold">{step.title}</h3><p className="mt-1 max-w-md text-xs leading-5 text-white/55">{step.text}</p></div>
-                <span className="font-display text-2xl text-white/20">{step.number}</span>
-              </div>
+              { title: "De filamento a florero", image: products[1].image },
+              { title: "Probando nuevos colores", image: products[0].image },
+              { title: "Modelo nuevo en camino", image: products[2].image },
+            ].map((video, index) => (
+              <a key={video.title} href={tiktokUrl} target="_blank" rel="noreferrer" className={`group relative min-h-[330px] overflow-hidden rounded-[22px] sm:min-h-[450px] ${index === 1 ? "translate-y-5" : ""}`}>
+                <Image src={video.image} alt={video.title} fill sizes="(max-width: 1024px) 30vw, 18vw" className="object-cover transition duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/10" />
+                <span className="absolute left-3 top-3 grid size-9 place-items-center rounded-full bg-white/85 text-[#35282d]"><Play size={13} fill="currentColor" /></span>
+                <div className="absolute bottom-4 left-4 right-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#eccbd3]">Video 0{index + 1}</p><p className="mt-1 font-display text-base font-semibold leading-tight sm:text-xl">{video.title}</p></div>
+              </a>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="page-shell">
-        <div className="relative overflow-hidden rounded-[30px] bg-[#d8b9c2] px-7 py-16 text-center sm:px-12 sm:py-20">
-          <Box className="absolute -left-5 -top-8 size-36 rotate-12 text-white/15" strokeWidth={1} />
-          <p className="eyebrow">Solo para ti</p>
-          <h2 className="mx-auto mt-3 max-w-2xl font-display text-5xl font-semibold leading-[0.95] sm:text-7xl">¿Tienes una idea dando vueltas?</h2>
-          <p className="mx-auto mt-5 max-w-lg text-sm leading-6 text-[#5f4b53]">Sube tus imagenes de referencia y conversa de forma privada con el estudio para hacerla realidad.</p>
-          <Link href="/personalizados" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#35282d] px-7 py-4 text-sm font-bold text-white">Pedir una cotizacion <ArrowRight size={16} /></Link>
         </div>
       </section>
     </main>

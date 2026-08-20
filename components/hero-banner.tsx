@@ -1,73 +1,44 @@
-"use client";
-
-import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
-import { formatPrice } from "@/lib/data";
-import { usePromotionStore } from "@/stores/promotion-store";
+import { ArrowRight, MapPin, PackageCheck, Scale, Truck } from "lucide-react";
 
 export function HeroBanner() {
-  const [active, setActive] = useState(0);
-  const promotions = usePromotionStore((state) => state.promotions);
-  const activePromotions = promotions.filter((promotion) => promotion.active);
-  const slides = activePromotions.length > 0 ? activePromotions : promotions.slice(0, 1);
-
-  useEffect(() => {
-    const timer = window.setInterval(() => {
-      setActive((current) => (current + 1) % slides.length);
-    }, 5500);
-    return () => window.clearInterval(timer);
-  }, [slides.length]);
-
-  const safeActive = active % slides.length;
-  const slide = slides[safeActive];
-  const changeSlide = (direction: number) => {
-    setActive((current) => (current + direction + slides.length) % slides.length);
-  };
-
   return (
-    <div className="relative min-h-[430px] overflow-hidden lg:min-h-full" aria-roledescription="carousel" aria-label="Productos destacados">
-      {slides.map((item, index) => (
-        <Image
-          key={item.id}
-          src={item.image}
-          alt={item.productName}
-          fill
-          priority={index === 0}
-          sizes="(max-width: 1024px) 100vw, 55vw"
-          className={`object-cover transition duration-700 ${index === safeActive ? "scale-100 opacity-100" : "pointer-events-none scale-[1.03] opacity-0"}`}
-        />
-      ))}
-      <div className="absolute inset-0 bg-gradient-to-t from-[#35282d]/55 via-transparent to-[#35282d]/10" />
+    <div className="relative flex min-h-[430px] flex-col justify-between overflow-hidden bg-[#35282d] p-7 text-white sm:p-10 lg:min-h-full lg:p-12">
+      <div className="absolute -right-24 -top-24 size-80 rounded-full border-[56px] border-[#c98698]/15" />
+      <div className="absolute bottom-[-90px] left-[-50px] size-64 rounded-full bg-[#c98698]/10" />
 
-      <div className="absolute left-5 top-5 max-w-[250px] rounded-2xl bg-[#fffdfb]/88 p-4 backdrop-blur-xl sm:left-8 sm:top-8">
-        <p className="text-[9px] font-extrabold uppercase tracking-[0.17em] text-[#9e5f72]">Promocion · {slide.code}</p>
-        <p className="mt-2 font-display text-2xl font-semibold leading-none">{slide.message}</p>
-      </div>
-
-      <div className="absolute bottom-5 left-5 right-5 flex items-center justify-between gap-4 rounded-2xl bg-[#fffdfb]/90 p-4 backdrop-blur-xl sm:bottom-8 sm:left-8 sm:right-8">
-        <div className="min-w-0">
-          <p className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#9e5f72]">{slide.value} · {formatPrice(slide.productPrice)}</p>
-          <p className="mt-1 truncate font-display text-xl font-semibold">{slide.productName}</p>
-        </div>
-        <div className="flex shrink-0 items-center gap-2">
-          <button onClick={() => changeSlide(-1)} className="grid size-9 place-items-center rounded-full border border-[#d8c9cd]" aria-label="Producto anterior">
-            <ChevronLeft size={15} />
-          </button>
-          <button onClick={() => changeSlide(1)} className="grid size-9 place-items-center rounded-full border border-[#d8c9cd]" aria-label="Producto siguiente">
-            <ChevronRight size={15} />
-          </button>
-          <Link href={`/producto/${slide.productSlug}`} className="grid size-11 place-items-center rounded-full bg-[#35282d] text-white" aria-label={`Ver ${slide.productName}`}>
-            <ArrowRight size={17} />
-          </Link>
+      <div className="relative">
+        <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#eccbd3]">
+          <Truck size={13} /> Entregas C&R
+        </span>
+        <p className="mt-8 text-xs font-bold uppercase tracking-[0.18em] text-white/45">En compras desde</p>
+        <div className="mt-1 flex items-end gap-3">
+          <span className="font-display text-[clamp(6rem,12vw,10rem)] font-semibold leading-[0.75] tracking-[-0.08em] text-[#eccbd3]">$60</span>
+          <span className="mb-1 max-w-28 text-sm font-bold leading-5">tu envio es gratis</span>
         </div>
       </div>
 
-      <div className="absolute right-6 top-6 flex gap-1.5 sm:right-8 sm:top-8">
-        {slides.map((item, index) => (
-          <button key={item.id} onClick={() => setActive(index)} className={`h-1.5 rounded-full transition-all ${index === safeActive ? "w-7 bg-[#35282d]" : "w-1.5 bg-[#35282d]/30"}`} aria-label={`Mostrar ${item.title}`} />
-        ))}
+      <div className="relative mt-10 grid gap-2 sm:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <MapPin size={17} className="text-[#eccbd3]" />
+          <p className="mt-4 text-xs font-bold">Entrega local gratis</p>
+          <p className="mt-1 text-[10px] leading-4 text-white/45">La Libertad, Salinas y cantón Santa Elena, sin compra minima.</p>
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+          <Scale size={17} className="text-[#eccbd3]" />
+          <p className="mt-4 text-xs font-bold">Resto del Ecuador</p>
+          <p className="mt-1 text-[10px] leading-4 text-white/45">Calculamos la tarifa de Servientrega según destino y peso.</p>
+        </div>
+      </div>
+
+      <div className="relative mt-6 flex items-center justify-between gap-4 rounded-2xl bg-[#fffdfb] p-4 text-[#35282d]">
+        <div className="flex items-center gap-3">
+          <span className="grid size-10 place-items-center rounded-full bg-[#f3e7e9] text-[#9e5f72]"><PackageCheck size={17} /></span>
+          <div><p className="text-[10px] font-bold">Conoce el costo antes de pagar</p><p className="mt-0.5 text-[9px] text-[#786970]">Ingresa tu ciudad en el checkout.</p></div>
+        </div>
+        <Link href="/catalogo" className="grid size-10 shrink-0 place-items-center rounded-full bg-[#35282d] text-white" aria-label="Explorar catalogo">
+          <ArrowRight size={15} />
+        </Link>
       </div>
     </div>
   );

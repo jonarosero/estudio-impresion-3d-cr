@@ -26,6 +26,7 @@ export const products: Product[] = [
     badge: "Favorita",
     featured: true,
     stock: 12,
+    weightGrams: 280,
   },
   {
     id: "p2",
@@ -41,6 +42,7 @@ export const products: Product[] = [
     badge: "Nuevo",
     featured: true,
     stock: 8,
+    weightGrams: 420,
   },
   {
     id: "p3",
@@ -54,6 +56,7 @@ export const products: Product[] = [
     colors: ["Rosa nube", "Lavanda", "Marfil"],
     featured: true,
     stock: 16,
+    weightGrams: 190,
   },
   {
     id: "p4",
@@ -68,6 +71,7 @@ export const products: Product[] = [
     badge: "Edicion corta",
     featured: true,
     stock: 6,
+    weightGrams: 120,
   },
   {
     id: "p5",
@@ -80,6 +84,7 @@ export const products: Product[] = [
     image: "https://images.unsplash.com/photo-1509423350716-97f2360af8e4?auto=format&fit=crop&w=1200&q=85",
     colors: ["Terracota", "Salvia", "Marfil"],
     stock: 9,
+    weightGrams: 340,
   },
   {
     id: "p6",
@@ -92,6 +97,7 @@ export const products: Product[] = [
     image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=1200&q=85",
     colors: ["Rosa arcilla", "Negro", "Arena"],
     stock: 14,
+    weightGrams: 110,
   },
   {
     id: "p7",
@@ -105,6 +111,7 @@ export const products: Product[] = [
     colors: ["Lavanda", "Rosa nube", "Salvia"],
     badge: "Mas vendido",
     stock: 11,
+    weightGrams: 230,
   },
   {
     id: "p8",
@@ -117,6 +124,7 @@ export const products: Product[] = [
     image: "https://images.unsplash.com/photo-1559454403-b8fb88521f11?auto=format&fit=crop&w=1200&q=85",
     colors: ["Rosa nube", "Miel", "Lavanda"],
     stock: 5,
+    weightGrams: 150,
   },
 ];
 

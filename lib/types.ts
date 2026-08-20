@@ -19,6 +19,7 @@ export type Product = {
   badge?: string;
   featured?: boolean;
   stock: number;
+  weightGrams: number;
 };
 
 export type CartLine = {
