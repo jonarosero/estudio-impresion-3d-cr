@@ -6,8 +6,9 @@ import Image from "next/image";
 import { useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-import { useQuoteStore, type QuoteImage } from "@/stores/quote-store";
+import { useQuoteStore } from "@/stores/quote-store";
 import { SelectMenu } from "@/components/ui/select-menu";
+import { useAccountStore } from "@/stores/account-store";
 
 const quoteSchema = z.object({
   name: z.string().min(2, "Escribe tu nombre"),
@@ -28,8 +29,11 @@ const fieldClass = "mt-2 w-full rounded-2xl border border-[#ded0d4] bg-[#faf6f6]
 export function CustomQuoteForm() {
   const [images, setImages] = useState<LocalImage[]>([]);
   const [imageError, setImageError] = useState("");
+  const [submitError, setSubmitError] = useState("");
   const [submittedId, setSubmittedId] = useState<string | null>(null);
   const addQuote = useQuoteStore((state) => state.addQuote);
+  const account = useAccountStore((state) => state.account);
+  const isAccountLoading = useAccountStore((state) => state.isLoading);
   const { register, handleSubmit, setValue, control, formState: { errors, isSubmitting } } = useForm<QuoteValues>({
     resolver: zodResolver(quoteSchema),
     defaultValues: { quantity: 1, color: "Rosa pastel" },
@@ -53,24 +57,26 @@ export function CustomQuoteForm() {
     });
   }
 
-  function onSubmit(values: QuoteValues) {
-    const uploadBatch = crypto.randomUUID();
-    const quoteImages: QuoteImage[] = images.map((image) => ({
-      id: crypto.randomUUID(),
-      name: image.file.name,
-      url: image.url,
-      storagePath: `quotes/demo-user/${uploadBatch}/${image.file.name}`,
-    }));
-    const quoteId = addQuote({
-      customer: values.name,
-      phone: values.phone,
-      description: values.description,
-      dimensions: `${values.height} alto x ${values.width} ancho x ${values.depth} profundidad cm`,
-      quantity: values.quantity,
-      color: values.color,
-      images: quoteImages,
-    });
-    setSubmittedId(quoteId);
+  async function onSubmit(values: QuoteValues) {
+    if (!account) {
+      setSubmitError("Inicia sesión para enviar una solicitud privada.");
+      return;
+    }
+    setSubmitError("");
+    try {
+      const quoteId = await addQuote({
+        customer: values.name,
+        phone: values.phone,
+        description: values.description,
+        dimensions: `${values.height} alto x ${values.width} ancho x ${values.depth} profundidad cm`,
+        quantity: values.quantity,
+        color: values.color,
+      }, images.map((image) => image.file));
+      images.forEach((image) => URL.revokeObjectURL(image.url));
+      setSubmittedId(quoteId);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "No fue posible enviar la solicitud. Inténtalo nuevamente.");
+    }
   }
 
   if (submittedId) return <QuoteConversation quoteId={submittedId} />;
@@ -95,7 +101,9 @@ export function CustomQuoteForm() {
         {imageError && <p className="mt-2 text-[10px] text-red-700">{imageError}</p>}
       </div>
        <div className="mt-6 flex gap-3 rounded-2xl bg-[#f3e7e9] p-4"><Info className="mt-0.5 shrink-0 text-[#9e5f72]" size={16} /><p className="text-[11px] leading-5 text-[#66575d]">Las imágenes son temporales. Se eliminan al descartar la cotización o al finalizar el pedido convertido; una limpieza automática elimina archivos vencidos.</p></div>
-      <button disabled={isSubmitting} className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#35282d] px-6 py-4 text-sm font-bold text-white transition hover:bg-[#9e5f72] disabled:opacity-60"><Send size={17} /> Enviar solicitud privada</button>
+       <button disabled={isSubmitting || isAccountLoading || !account} className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-[#35282d] px-6 py-4 text-sm font-bold text-white transition hover:bg-[#9e5f72] disabled:opacity-60"><Send size={17} /> Enviar solicitud privada</button>
+       {!isAccountLoading && !account && <p className="mt-3 text-center text-[10px] text-red-700">Inicia sesión para enviar una solicitud privada.</p>}
+       {submitError && <p className="mt-3 text-center text-[10px] text-red-700">{submitError}</p>}
        <p className="mt-3 text-center text-[10px] text-[#91848a]">Podrás continuar la conversación sin salir de la tienda.</p>
     </form>
   );
@@ -103,14 +111,20 @@ export function CustomQuoteForm() {
 
 function QuoteConversation({ quoteId }: { quoteId: string }) {
   const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState("");
   const quote = useQuoteStore((state) => state.quotes.find((item) => item.id === quoteId));
   const addMessage = useQuoteStore((state) => state.addMessage);
-  if (!quote) return null;
+  if (!quote) return <p className="text-sm text-[#786970]">Cargando conversación...</p>;
 
-  function sendMessage() {
+  async function sendMessage() {
     if (!message.trim()) return;
-    addMessage(quoteId, "customer", message.trim());
-    setMessage("");
+    setMessageError("");
+    try {
+      await addMessage(quoteId, "customer", message.trim());
+      setMessage("");
+    } catch {
+      setMessageError("No fue posible enviar el mensaje.");
+    }
   }
 
   return (
@@ -120,7 +134,8 @@ function QuoteConversation({ quoteId }: { quoteId: string }) {
        <p className="mt-3 text-sm leading-6 text-[#786970]">El estudio responderá aquí. Tus referencias permanecerán disponibles mientras la cotización o el pedido estén activos.</p>
       {quote.images.length > 0 && <div className="mt-6 grid grid-cols-4 gap-2">{quote.images.map((image) => <div key={image.id} className="relative aspect-square overflow-hidden rounded-xl"><Image src={image.url} alt={image.name} fill unoptimized className="object-cover" /></div>)}</div>}
       <div className="mt-6 max-h-64 space-y-3 overflow-y-auto rounded-2xl bg-[#faf6f6] p-4">{quote.messages.map((item) => <div key={item.id} className={`max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-5 ${item.sender === "customer" ? "ml-auto bg-[#35282d] text-white" : "bg-white"}`}><p>{item.text}</p><span className={`mt-1 block text-[8px] ${item.sender === "customer" ? "text-white/45" : "text-[#91848a]"}`}>{item.createdAt}</span></div>)}</div>
-      <div className="mt-4 flex gap-2"><input value={message} onChange={(event) => setMessage(event.target.value)} onKeyDown={(event) => event.key === "Enter" && sendMessage()} placeholder="Escribe un mensaje" className="min-w-0 flex-1 rounded-full border border-[#ded0d4] px-4 py-3 text-sm" /><button onClick={sendMessage} className="grid size-11 place-items-center rounded-full bg-[#35282d] text-white" aria-label="Enviar mensaje"><MessageCircle size={17} /></button></div>
+       <div className="mt-4 flex gap-2"><input value={message} onChange={(event) => setMessage(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") void sendMessage(); }} placeholder="Escribe un mensaje" className="min-w-0 flex-1 rounded-full border border-[#ded0d4] px-4 py-3 text-sm" /><button onClick={() => void sendMessage()} className="grid size-11 place-items-center rounded-full bg-[#35282d] text-white" aria-label="Enviar mensaje"><MessageCircle size={17} /></button></div>
+       {messageError && <p className="mt-2 text-[10px] text-red-700">{messageError}</p>}
     </div>
   );
 }

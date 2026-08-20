@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
+import { FirebaseAuthProvider } from "@/components/firebase/auth-provider";
+import { FirebaseCatalogProvider } from "@/components/firebase/catalog-provider";
 import { SiteChrome } from "@/components/ui/site-chrome";
 
 const display = Cormorant_Garamond({
@@ -26,7 +28,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="es" className={`${display.variable} ${sans.variable}`}>
       <body>
-        <SiteChrome>{children}</SiteChrome>
+        <FirebaseAuthProvider><FirebaseCatalogProvider><SiteChrome>{children}</SiteChrome></FirebaseCatalogProvider></FirebaseAuthProvider>
       </body>
     </html>
   );

@@ -37,7 +37,6 @@ export const products: Product[] = [
     availableFinishes: ["standard"],
     badge: "Favorita",
     featured: true,
-    stock: 12,
     weightGrams: 280,
   },
   {
@@ -56,7 +55,6 @@ export const products: Product[] = [
     availableFinishes: ["standard", "hand-painted"],
     badge: "Nuevo",
     featured: true,
-    stock: 8,
     weightGrams: 420,
   },
   {
@@ -73,7 +71,6 @@ export const products: Product[] = [
     colorPresentation: "single",
     availableFinishes: ["standard"],
     featured: true,
-    stock: 16,
     weightGrams: 190,
   },
   {
@@ -91,7 +88,6 @@ export const products: Product[] = [
     availableFinishes: ["standard"],
     badge: "Edición corta",
     featured: true,
-    stock: 6,
     weightGrams: 120,
   },
   {
@@ -107,7 +103,6 @@ export const products: Product[] = [
     colorVariants: makeColorVariants(["Terracota", "Salvia", "Marfil"], "https://images.unsplash.com/photo-1509423350716-97f2360af8e4?auto=format&fit=crop&w=1200&q=85", 21),
     colorPresentation: "single",
     availableFinishes: ["standard"],
-    stock: 9,
     weightGrams: 340,
   },
   {
@@ -123,7 +118,6 @@ export const products: Product[] = [
     colorVariants: makeColorVariants(["Rosa arcilla", "Negro", "Arena"], "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=1200&q=85", 14),
     colorPresentation: "single",
     availableFinishes: ["standard", "ready-to-paint"],
-    stock: 14,
     weightGrams: 110,
   },
   {
@@ -140,7 +134,6 @@ export const products: Product[] = [
     colorPresentation: "single",
     availableFinishes: ["standard"],
     badge: "Más vendido",
-    stock: 11,
     weightGrams: 230,
   },
   {
@@ -156,7 +149,6 @@ export const products: Product[] = [
     colorVariants: makeColorVariants(["Rosa nube", "Miel", "Lavanda"], "https://images.unsplash.com/photo-1559454403-b8fb88521f11?auto=format&fit=crop&w=1200&q=85", 15.75).map((variant) => ({ ...variant, type: "multicolor" as const })),
     colorPresentation: "multicolor",
     availableFinishes: ["standard"],
-    stock: 5,
     weightGrams: 150,
   },
 ];

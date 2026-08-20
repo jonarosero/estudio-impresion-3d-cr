@@ -25,11 +25,23 @@ La eliminacion debe ser idempotente: intentar borrar un archivo que ya no existe
 
 ## Firebase
 
-- Authentication con Google identifica clientes y administradores.
-- Firestore almacena productos, promociones, pedidos, cotizaciones y mensajes.
-- Storage almacena fotografias de productos y referencias temporales.
+- Proyecto: `estudio-jj-3d`.
+- Consola: https://console.firebase.google.com/project/estudio-jj-3d/overview
+- Firestore esta creado en `nam5`; sus reglas se publican con `npx firebase deploy --only firestore:rules`.
+- Authentication con Google identifica clientes y administradores. La aplicacion crea un perfil `users/{uid}` con rol inicial `customer` al primer acceso.
+- Los administradores requieren el custom claim `admin: true`, asignado exclusivamente con Firebase Admin desde un entorno de servidor.
+- Storage almacena fotografias de productos y referencias temporales. Antes del primer despliegue de reglas se debe crear el bucket en la consola.
 - Firebase Admin ejecuta transiciones de estado y eliminacion de archivos.
 - App Check protege formularios y rutas publicas contra abuso.
+
+### Configuracion pendiente en consola
+
+1. Crear un cliente OAuth 2.0 web para Google en Cloud Console y habilitarlo en Authentication. Usar `https://estudio-jj-3d.firebaseapp.com/__/auth/handler` como URI de redireccion autorizada; el Client ID y Client Secret se requieren para activar el proveedor por API.
+2. Los dominios `studiocr-three.vercel.app`, `studiocr-jonaroseros-projects.vercel.app` y `studiocr-git-main-jonaroseros-projects.vercel.app` ya estan autorizados.
+3. Storage ya esta creado en `US-EAST1` y sus reglas estan publicadas.
+4. Para otorgar administracion, usar Firebase Admin para asignar `{ admin: true }` al usuario y pedirle que vuelva a iniciar sesion para renovar su token.
+
+La configuracion publica del cliente se define en `.env.example`; en produccion ya esta cargada como variables `NEXT_PUBLIC_FIREBASE_*` en Vercel. No guardar claves privadas de Firebase Admin en el cliente ni en el repositorio.
 
 ## DEUNA
 

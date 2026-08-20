@@ -31,6 +31,7 @@ import { formatPrice } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { useQuoteStore, type QuoteStatus } from "@/stores/quote-store";
 import { useAccountStore } from "@/stores/account-store";
+import { useOrderStore } from "@/stores/order-store";
 
 type Tab =
   | "resumen"
@@ -51,42 +52,13 @@ const nav: Array<{ id: Tab; label: string; icon: typeof Box }> = [
   { id: "configuración", label: "Configuración", icon: Settings },
 ];
 
-const orders = [
-  {
-    id: "CR-00245",
-    customer: "Maria J.",
-    total: 38.5,
-    status: "Nuevo",
-    date: "Hoy, 10:24",
-  },
-  {
-    id: "CR-00244",
-    customer: "Andrea P.",
-    total: 61,
-    status: "Producción",
-    date: "Hoy, 08:12",
-  },
-  {
-    id: "CR-00243",
-    customer: "Sofia R.",
-    total: 24,
-    status: "Enviado",
-    date: "Ayer, 16:40",
-  },
-  {
-    id: "CR-00242",
-    customer: "Daniela C.",
-    total: 47.9,
-    status: "Entregado",
-    date: "18 ago",
-  },
-];
-
 export function DashboardView() {
   const [tab, setTab] = useState<Tab>("resumen");
   const [mobileNav, setMobileNav] = useState(false);
   const [search, setSearch] = useState("");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const orders = useOrderStore((state) => state.orders);
+  const quotes = useQuoteStore((state) => state.quotes);
   const currentLabel = nav.find((item) => item.id === tab)?.label;
 
   function changeTab(next: Tab) {
@@ -134,7 +106,7 @@ export function DashboardView() {
                 {item.label}
                 {item.id === "pedidos" && (
                   <span className="ml-auto rounded-full bg-white/10 px-2 py-0.5 text-[9px]">
-                    4
+                    {orders.length}
                   </span>
                 )}
               </button>
@@ -143,8 +115,7 @@ export function DashboardView() {
           <div className="mt-8 rounded-2xl bg-white/5 p-4">
             <p className="text-[10px] font-bold">Modo demostracion</p>
             <p className="mt-2 text-[9px] leading-4 text-white/40">
-              Los cambios son visuales. Firebase se conectara al pasar a
-              producción.
+              Datos conectados a Firebase en tiempo real.
             </p>
           </div>
           <Link
@@ -215,10 +186,10 @@ export function DashboardView() {
                   <div className="absolute right-0 top-11 z-20 w-64 rounded-2xl border border-[#e5d8dc] bg-white p-3 shadow-lg">
                     <p className="text-xs font-bold">Notificaciones</p>
                     <p className="mt-3 rounded-xl bg-[#f3e7e9] p-3 text-[10px]">
-                      Tienes 4 pedidos nuevos por revisar.
+                       Tienes {orders.filter((order) => order.status === "pending_payment").length} pedidos pendientes por revisar.
                     </p>
                     <p className="mt-2 rounded-xl bg-[#faf6f6] p-3 text-[10px]">
-                      Hay 2 cotizaciones esperando respuesta.
+                       Hay {quotes.filter((quote) => quote.status === "new").length} cotizaciones esperando respuesta.
                     </p>
                   </div>
                 )}
@@ -230,7 +201,7 @@ export function DashboardView() {
           </header>
           <div className="p-5 sm:p-8">
             {tab === "resumen" && (
-              <Overview onOpenProducts={() => changeTab("productos")} />
+              <Overview onOpenProducts={() => changeTab("productos")} orders={orders} />
             )}
             {tab === "productos" && <DashboardProducts />}
             {tab === "promociones" && <PromotionsPanel />}
@@ -245,33 +216,37 @@ export function DashboardView() {
   );
 }
 
-function Overview({ onOpenProducts }: { onOpenProducts: () => void }) {
+function Overview({ onOpenProducts, orders }: { onOpenProducts: () => void; orders: ReturnType<typeof useOrderStore.getState>["orders"] }) {
+  const account = useAccountStore((state) => state.account);
+  const quotes = useQuoteStore((state) => state.quotes);
+  const sales = orders.filter((order) => order.paymentStatus === "paid").reduce((total, order) => total + order.total, 0);
+  const activeOrders = orders.filter((order) => !["delivered", "cancelled"].includes(order.status));
   const stats = [
     {
       label: "Ventas del mes",
-      value: "$1.248",
-      note: "+12,4%",
+       value: formatPrice(sales),
+       note: "Cobros confirmados",
       icon: CircleDollarSign,
       color: "bg-[#ead7dc] text-[#9e5f72]",
     },
     {
       label: "Pedidos activos",
-      value: "18",
-      note: "4 nuevos",
+       value: String(activeOrders.length),
+       note: `${orders.filter((order) => order.status === "pending_payment").length} pendientes`,
       icon: Package,
       color: "bg-[#e4ebe0] text-[#567050]",
     },
     {
       label: "Cotizaciones",
-      value: "7",
-      note: "3 por revisar",
+       value: String(quotes.length),
+       note: `${quotes.filter((quote) => quote.status === "new").length} por revisar`,
       icon: ClipboardList,
       color: "bg-[#eee6d8] text-[#886e42]",
     },
     {
       label: "Conversion",
-      value: "3,8%",
-      note: "+0,6%",
+       value: orders.length ? `${Math.round((orders.filter((order) => order.paymentStatus === "paid").length / orders.length) * 100)}%` : "0%",
+       note: "Pedidos pagados",
       icon: TrendingUp,
       color: "bg-[#e6e1ee] text-[#665687]",
     },
@@ -282,7 +257,7 @@ function Overview({ onOpenProducts }: { onOpenProducts: () => void }) {
         <div>
           <p className="text-xs text-[#786970]">Jueves, 20 de agosto</p>
           <h2 className="mt-1 font-display text-4xl font-semibold">
-            Buenos días, Carolina
+             Buenos días, {account?.name.split(" ")[0] ?? "administración"}
           </h2>
         </div>
         <button
@@ -344,7 +319,7 @@ function Overview({ onOpenProducts }: { onOpenProducts: () => void }) {
         <div className="rounded-2xl bg-[#fffdfb] p-5">
           <p className="text-xs font-bold">Actividad reciente</p>
           <div className="mt-5 space-y-5">
-            {orders.slice(0, 3).map((order) => (
+             {orders.slice(0, 3).map((order) => (
               <div key={order.id} className="flex items-center gap-3">
                 <span className="grid size-9 place-items-center rounded-full bg-[#f3e7e9] text-[#9e5f72]">
                   <ShoppingBag size={14} />
@@ -354,7 +329,7 @@ function Overview({ onOpenProducts }: { onOpenProducts: () => void }) {
                     Pedido {order.id}
                   </p>
                   <p className="mt-1 text-[9px] text-[#786970]">
-                    {order.customer} · {order.date}
+                     {order.customer} · {new Date(order.createdAt).toLocaleDateString("es-EC")}
                   </p>
                 </div>
                 <span className="text-[10px] font-bold">
@@ -370,11 +345,12 @@ function Overview({ onOpenProducts }: { onOpenProducts: () => void }) {
 }
 
 function OrdersPanel() {
+  const orders = useOrderStore((state) => state.orders);
   const [search, setSearch] = useState("");
   const normalizedSearch = search.trim().toLowerCase();
   const filteredOrders = orders.filter((order) =>
-    [order.id, order.customer, order.status, order.date].some((value) =>
-      value.toLowerCase().includes(normalizedSearch),
+     [order.id, order.customer, order.status, order.createdAt].some((value) =>
+       value.toLowerCase().includes(normalizedSearch),
     ),
   );
 
@@ -406,7 +382,7 @@ function OrdersPanel() {
             >
               <div>
                 <p className="text-xs font-bold">{order.id}</p>
-                <p className="mt-1 text-[9px] text-[#786970]">{order.date}</p>
+                 <p className="mt-1 text-[9px] text-[#786970]">{new Date(order.createdAt).toLocaleDateString("es-EC")}</p>
               </div>
               <span className="hidden text-[10px] sm:block">
                 {order.customer}
@@ -415,7 +391,7 @@ function OrdersPanel() {
                 {formatPrice(order.total)}
               </span>
               <span className="hidden sm:block">
-                <Status value={order.status} />
+                 <Status value={order.status} />
               </span>
               <button className="flex items-center gap-1 text-[9px] font-bold text-[#9e5f72]">
                 Detalle <ChevronRight size={12} />
@@ -707,7 +683,6 @@ function CustomersPanel() {
   const [selectedId, setSelectedId] = useState(customers[0].id);
   const [search, setSearch] = useState("");
   const users = useAccountStore((state) => state.users);
-  const setRole = useAccountStore((state) => state.setRole);
   const normalizedSearch = search.trim().toLowerCase();
   const filteredCustomers = customers.filter((customer) =>
     [customer.name, customer.email, customer.phone].some((value) =>
@@ -805,21 +780,7 @@ function CustomersPanel() {
             <p className="mt-1 text-[10px] text-[#786970]">
               {selected.email} · {selected.phone}
             </p>
-            {selectedAccount && (
-              <button
-                onClick={() =>
-                  setRole(
-                    selectedAccount.id,
-                    selectedAccount.role === "admin" ? "customer" : "admin",
-                  )
-                }
-                className="mt-4 rounded-full bg-[#35282d] px-4 py-2.5 text-[10px] font-bold text-white"
-              >
-                {selectedAccount.role === "admin"
-                  ? "Quitar administrador"
-                  : "Hacer administrador"}
-              </button>
-            )}
+            {selectedAccount && <p className="mt-4 text-[10px] text-[#786970]">El rol se administra desde Firebase Admin.</p>}
             <div className="mt-6 border-t border-[#eee5e7] pt-5">
               <p className="text-[9px] font-bold uppercase tracking-wider text-[#9e5f72]">
                 Facturación

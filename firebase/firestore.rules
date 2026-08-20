@@ -10,6 +10,17 @@ service cloud.firestore {
       return signedIn() && request.auth.token.admin == true;
     }
 
+    match /users/{userId} {
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.role == "customer";
+      allow read: if isAdmin() || (signedIn() && request.auth.uid == userId);
+      allow update: if isAdmin() || (signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.role == resource.data.role);
+      allow delete: if isAdmin();
+    }
+
     match /products/{productId} {
       allow read: if resource.data.status == "active" || isAdmin();
       allow write: if isAdmin();
@@ -22,19 +33,29 @@ service cloud.firestore {
 
     match /orders/{orderId} {
       allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
-      allow write: if isAdmin();
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == "pending_payment"
+        && request.resource.data.paymentStatus == "pending";
+      allow update, delete: if isAdmin();
     }
 
-    match /quotes/{quoteId} {
-      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      match /quotes/{quoteId} {
+       allow create: if signedIn()
+         && request.resource.data.userId == request.auth.uid
+         && request.resource.data.status == "new";
       allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
       allow update: if isAdmin();
       allow delete: if isAdmin();
 
       match /messages/{messageId} {
-        allow read, create: if isAdmin()
-          || (signedIn()
-            && get(/databases/$(database)/documents/quotes/$(quoteId)).data.userId == request.auth.uid);
+         allow read: if isAdmin()
+           || (signedIn()
+             && get(/databases/$(database)/documents/quotes/$(quoteId)).data.userId == request.auth.uid);
+         allow create: if isAdmin()
+           || (signedIn()
+             && request.resource.data.sender == "customer"
+             && getAfter(/databases/$(database)/documents/quotes/$(quoteId)).data.userId == request.auth.uid);
         allow update, delete: if false;
       }
     }

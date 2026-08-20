@@ -12,6 +12,7 @@
   "dependencies": {
     "@hookform/resolvers": "latest",
     "clsx": "latest",
+    "firebase": "^12.18.0",
     "lucide-react": "latest",
     "next": "latest",
     "react": "latest",

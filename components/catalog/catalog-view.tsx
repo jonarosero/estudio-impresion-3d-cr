@@ -4,10 +4,11 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { ProductCard } from "@/components/product/product-card";
-import { categories, products } from "@/lib/data";
+import { categories } from "@/lib/data";
 import type { CategoryId } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { SelectMenu } from "@/components/ui/select-menu";
+import { useProductStore } from "@/stores/product-store";
 
 export function CatalogView() {
   const params = useSearchParams();
@@ -18,6 +19,7 @@ export function CatalogView() {
     : "todos";
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState("destacados");
+  const products = useProductStore((state) => state.products);
 
   function selectCategory(nextCategory: CategoryId | "todos") {
     router.push(nextCategory === "todos" ? "/catalogo" : `/catalogo?categoria=${nextCategory}`);

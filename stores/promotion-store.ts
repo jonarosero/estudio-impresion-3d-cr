@@ -1,7 +1,8 @@
 "use client";
 
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { doc, updateDoc } from "firebase/firestore";
+import { getFirebaseDb } from "@/lib/firebase/client";
 
 export type Promotion = {
   id: string;
@@ -16,7 +17,7 @@ export type Promotion = {
   active: boolean;
 };
 
-const initialPromotions: Promotion[] = [
+export const initialPromotions: Promotion[] = [
   {
     id: "welcome",
     title: "Bienvenida J&J",
@@ -57,20 +58,16 @@ const initialPromotions: Promotion[] = [
 
 type PromotionState = {
   promotions: Promotion[];
-  toggle: (id: string) => void;
+  replace: (promotions: Promotion[]) => void;
+  toggle: (id: string) => Promise<void>;
 };
 
-export const usePromotionStore = create<PromotionState>()(
-  persist(
-    (set) => ({
-      promotions: initialPromotions,
-      toggle: (id) =>
-        set((state) => ({
-          promotions: state.promotions.map((promotion) =>
-            promotion.id === id ? { ...promotion, active: !promotion.active } : promotion,
-          ),
-        })),
-    }),
-    { name: "cr-promotions" },
-  ),
-);
+export const usePromotionStore = create<PromotionState>()((set) => ({
+  promotions: initialPromotions,
+  replace: (promotions) => set({ promotions }),
+  toggle: async (id) => {
+    const promotion = usePromotionStore.getState().promotions.find((item) => item.id === id);
+    if (!promotion) return;
+    await updateDoc(doc(getFirebaseDb(), "promotions", id), { active: !promotion.active, status: promotion.active ? "inactive" : "active" });
+  },
+}));

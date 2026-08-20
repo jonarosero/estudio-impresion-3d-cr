@@ -39,7 +39,6 @@ export type Product = {
   finishOptions?: ProductFinishOption[];
   badge?: string;
   featured?: boolean;
-  stock: number;
   weightGrams: number;
 };
 

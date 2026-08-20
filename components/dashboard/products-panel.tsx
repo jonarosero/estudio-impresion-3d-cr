@@ -38,7 +38,6 @@ const emptyProduct: Omit<Product, "id"> = {
   ],
   colorPresentation: "single",
   availableFinishes: ["standard"],
-  stock: 0,
   weightGrams: 100,
   featured: false,
 };
@@ -334,18 +333,6 @@ export function DashboardProducts() {
                   type="number"
                   min="0"
                   step="0.01"
-                  className={inputClass}
-                />
-              </label>
-              <label className={labelClass}>
-                Stock
-                <input
-                  value={draft.stock}
-                  onChange={(event) =>
-                    setDraft({ ...draft, stock: Number(event.target.value) })
-                  }
-                  type="number"
-                  min="0"
                   className={inputClass}
                 />
               </label>
@@ -677,19 +664,18 @@ export function DashboardProducts() {
         />
       </label>
       <div className="mt-4 overflow-hidden rounded-2xl bg-[#fffdfb]">
-        <div className="hidden grid-cols-[2fr_1fr_.7fr_.7fr_.7fr_auto] gap-4 border-b border-[#e5d8dc] px-5 py-3 text-[9px] font-bold uppercase tracking-wider text-[#91848a] md:grid">
+        <div className="hidden grid-cols-[2fr_1fr_.7fr_.7fr_auto] gap-4 border-b border-[#e5d8dc] px-5 py-3 text-[9px] font-bold uppercase tracking-wider text-[#91848a] md:grid">
           <span>Producto</span>
           <span>Categoría</span>
           <span>Precio</span>
           <span>Peso</span>
-          <span>Stock</span>
           <span>Acciones</span>
         </div>
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
             <div
               key={product.id}
-              className="grid grid-cols-[48px_1fr_auto] items-center gap-3 border-b border-[#eee5e7] px-4 py-4 last:border-0 md:grid-cols-[52px_2fr_1fr_.7fr_.7fr_.7fr_auto]"
+              className="grid grid-cols-[48px_1fr_auto] items-center gap-3 border-b border-[#eee5e7] px-4 py-4 last:border-0 md:grid-cols-[52px_2fr_1fr_.7fr_.7fr_auto]"
             >
               <div className="relative aspect-square overflow-hidden rounded-xl">
                 <Image
@@ -712,9 +698,6 @@ export function DashboardProducts() {
               </span>
               <span className="hidden text-[10px] md:block">
                 {product.weightGrams ?? 250} g
-              </span>
-              <span className="hidden text-[10px] md:block">
-                {product.stock}
               </span>
               <div className="flex gap-1">
                 <button

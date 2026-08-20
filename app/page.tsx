@@ -2,9 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { HeroBanner } from "@/components/marketing/hero-banner";
-import { ProductCard } from "@/components/product/product-card";
+import { FeaturedProducts } from "@/components/catalog/featured-products";
 import { TiktokShowcase } from "@/components/marketing/tiktok-showcase";
-import { categories, products } from "@/lib/data";
+import { categories } from "@/lib/data";
 
 export default function Home() {
   return (
@@ -75,9 +75,7 @@ export default function Home() {
             <h2 className="mt-3 font-display text-4xl font-semibold sm:text-6xl">Piezas con personalidad</h2>
             <p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-[#786970]">Formas amables, texturas sutiles y colores pensados para convivir contigo.</p>
           </div>
-          <div className="mt-12 grid grid-cols-2 gap-x-3 gap-y-10 md:grid-cols-4 md:gap-x-5">
-            {products.filter((product) => product.featured).map((product) => <ProductCard key={product.id} product={product} />)}
-          </div>
+          <FeaturedProducts />
         </div>
       </section>
 

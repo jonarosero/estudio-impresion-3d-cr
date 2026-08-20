@@ -1,6 +1,9 @@
 "use client";
 
 import { create } from "zustand";
+import { collection, doc, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
+import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { getFirebaseAuth, getFirebaseDb, getFirebaseStorage, isFirebaseConfigured } from "@/lib/firebase/client";
 
 export type QuoteStatus = "new" | "reviewing" | "quoted" | "converted" | "discarded" | "completed";
 
@@ -33,103 +36,139 @@ export type Quote = {
   expiresAt: string;
 };
 
-type NewQuote = Omit<Quote, "id" | "status" | "messages" | "createdAt" | "expiresAt">;
-
-const demoQuotes: Quote[] = [
-  {
-    id: "Q-1042",
-    customer: "Johana V.",
-    phone: "099 321 4567",
-    description: "Organizador modular para maquillaje y brochas.",
-    dimensions: "28 x 18 cm",
-    quantity: 1,
-    color: "Rosa pastel",
-    status: "quoted",
-    images: [],
-    messages: [
-      { id: "m1", sender: "customer", text: "Quisiera separar las brochas de los labiales.", createdAt: "Ayer, 10:15" },
-      { id: "m2", sender: "admin", text: "Podemos hacerlo en tres módulos por $32. Te envío la propuesta.", createdAt: "Ayer, 11:02" },
-    ],
-    createdAt: "Ayer",
-    expiresAt: "17 sep 2026",
-  },
-  {
-    id: "Q-1041",
-    customer: "Camila S.",
-    phone: "098 111 2233",
-    description: "Recuerdos personalizados para bautizo.",
-    dimensions: "8 cm",
-    quantity: 30,
-    color: "Blanco",
-    status: "reviewing",
-    images: [],
-    messages: [
-      { id: "m3", sender: "customer", text: "Necesito incluir el nombre y la fecha en cada pieza.", createdAt: "18 ago, 16:40" },
-    ],
-    createdAt: "18 ago",
-    expiresAt: "17 sep 2026",
-  },
-];
+export type NewQuote = Omit<Quote, "id" | "status" | "images" | "messages" | "createdAt" | "expiresAt">;
 
 type QuoteState = {
   quotes: Quote[];
-  addQuote: (quote: NewQuote) => string;
-  addMessage: (quoteId: string, sender: QuoteMessage["sender"], text: string) => void;
-  setStatus: (quoteId: string, status: QuoteStatus) => void;
+  startListening: (userId: string, isAdmin: boolean) => void;
+  stopListening: () => void;
+  addQuote: (quote: NewQuote, files: File[]) => Promise<string>;
+  addMessage: (quoteId: string, sender: QuoteMessage["sender"], text: string) => Promise<void>;
+  setStatus: (quoteId: string, status: QuoteStatus) => Promise<void>;
 };
 
-export const useQuoteStore = create<QuoteState>((set) => ({
-  quotes: demoQuotes,
-  addQuote: (quote) => {
-    const id = `Q-${Date.now().toString().slice(-6)}`;
-    const now = new Date();
-    const expires = new Date(now);
-    expires.setDate(expires.getDate() + 30);
-    set((state) => ({
-      quotes: [
-        {
-          ...quote,
-          id,
-          status: "new",
-          messages: [
-            {
-              id: crypto.randomUUID(),
-              sender: "customer",
-              text: quote.description,
-              createdAt: "Ahora",
-            },
-          ],
-          createdAt: "Ahora",
-          expiresAt: expires.toLocaleDateString("es-EC"),
-        },
-        ...state.quotes,
-      ],
-    }));
-    return id;
-  },
-  addMessage: (quoteId, sender, text) =>
-    set((state) => ({
-      quotes: state.quotes.map((quote) =>
-        quote.id === quoteId
-          ? {
-              ...quote,
-              messages: [
-                ...quote.messages,
-                { id: crypto.randomUUID(), sender, text, createdAt: "Ahora" },
-              ],
-            }
-          : quote,
-      ),
-    })),
-  setStatus: (quoteId, status) =>
-    set((state) => ({
-      quotes: state.quotes.map((quote) => {
-        if (quote.id !== quoteId) return quote;
-        const shouldDeleteImages = status === "discarded" || status === "completed";
-        if (shouldDeleteImages) {
-          quote.images.forEach((image) => URL.revokeObjectURL(image.url));
+const messageUnsubscribers = new Map<string, () => void>();
+let quotesUnsubscribe: (() => void) | undefined;
+
+function clearListeners() {
+  quotesUnsubscribe?.();
+  quotesUnsubscribe = undefined;
+  messageUnsubscribers.forEach((unsubscribe) => unsubscribe());
+  messageUnsubscribers.clear();
+}
+
+function formattedDate(value: string) {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("es-EC", { day: "numeric", month: "short" });
+}
+
+function toQuote(id: string, data: Record<string, unknown>, messages: QuoteMessage[] = []): Quote {
+  return {
+    id,
+    customer: String(data.customer ?? ""),
+    phone: String(data.phone ?? ""),
+    description: String(data.description ?? ""),
+    dimensions: String(data.dimensions ?? ""),
+    quantity: Number(data.quantity ?? 0),
+    color: String(data.color ?? ""),
+    status: data.status as QuoteStatus,
+    images: (data.images as QuoteImage[] | undefined) ?? [],
+    messages,
+    createdAt: formattedDate(String(data.createdAt ?? "")),
+    expiresAt: formattedDate(String(data.expiresAt ?? "")),
+  };
+}
+
+function requireUser() {
+  if (!isFirebaseConfigured) throw new Error("Firebase no esta configurado.");
+  const user = getFirebaseAuth().currentUser;
+  if (!user) throw new Error("Debes iniciar sesion para enviar una cotizacion.");
+  return user;
+}
+
+export const useQuoteStore = create<QuoteState>((set, get) => ({
+  quotes: [],
+  startListening: (userId, isAdmin) => {
+    clearListeners();
+    if (!isFirebaseConfigured) return;
+
+    const quotesRef = collection(getFirebaseDb(), "quotes");
+    const quotesQuery = isAdmin ? quotesRef : query(quotesRef, where("userId", "==", userId));
+
+    quotesUnsubscribe = onSnapshot(quotesQuery, (snapshot) => {
+      const current = get().quotes;
+      const quotes = [...snapshot.docs].sort((left, right) => String(right.data().createdAt ?? "").localeCompare(String(left.data().createdAt ?? ""))).map((quoteDoc) => {
+        const existing = current.find((quote) => quote.id === quoteDoc.id);
+        return toQuote(quoteDoc.id, quoteDoc.data(), existing?.messages);
+      });
+      const activeIds = new Set(quotes.map((quote) => quote.id));
+
+      messageUnsubscribers.forEach((unsubscribe, quoteId) => {
+        if (!activeIds.has(quoteId)) {
+          unsubscribe();
+          messageUnsubscribers.delete(quoteId);
         }
-        return { ...quote, status, images: shouldDeleteImages ? [] : quote.images };
-      }),
-    })),
+      });
+      set({ quotes });
+
+      snapshot.docs.forEach((quoteDoc) => {
+        if (messageUnsubscribers.has(quoteDoc.id)) return;
+        const messagesQuery = query(collection(quoteDoc.ref, "messages"), orderBy("createdAt", "asc"));
+        messageUnsubscribers.set(quoteDoc.id, onSnapshot(messagesQuery, (messagesSnapshot) => {
+          const messages = messagesSnapshot.docs.map((messageDoc) => ({
+            id: messageDoc.id,
+            sender: messageDoc.data().sender as QuoteMessage["sender"],
+            text: String(messageDoc.data().text ?? ""),
+            createdAt: formattedDate(String(messageDoc.data().createdAt ?? "")),
+          }));
+          set((state) => ({
+            quotes: state.quotes.map((quote) => quote.id === quoteDoc.id ? { ...quote, messages } : quote),
+          }));
+        }));
+      });
+    });
+  },
+  stopListening: () => {
+    clearListeners();
+    set({ quotes: [] });
+  },
+  addQuote: async (quote, files) => {
+    const user = requireUser();
+    const quoteRef = doc(collection(getFirebaseDb(), "quotes"));
+    const uploadedImages: QuoteImage[] = [];
+
+    try {
+      for (const file of files) {
+        const imageRef = ref(getFirebaseStorage(), `quotes/${user.uid}/${quoteRef.id}/${crypto.randomUUID()}-${file.name}`);
+        await uploadBytes(imageRef, file, { contentType: file.type });
+        uploadedImages.push({ id: crypto.randomUUID(), name: file.name, url: await getDownloadURL(imageRef), storagePath: imageRef.fullPath });
+      }
+
+      const now = new Date();
+      const expires = new Date(now);
+      expires.setDate(expires.getDate() + 30);
+      const batch = writeBatch(getFirebaseDb());
+      batch.set(quoteRef, { ...quote, userId: user.uid, status: "new", images: uploadedImages, createdAt: now.toISOString(), expiresAt: expires.toISOString() });
+      batch.set(doc(collection(quoteRef, "messages")), { sender: "customer", text: quote.description, createdAt: now.toISOString() });
+      await batch.commit();
+      return quoteRef.id;
+    } catch (error) {
+      await Promise.all(uploadedImages.map((image) => deleteObject(ref(getFirebaseStorage(), image.storagePath)).catch(() => undefined)));
+      throw error;
+    }
+  },
+  addMessage: async (quoteId, sender, text) => {
+    requireUser();
+    const messageRef = doc(collection(getFirebaseDb(), "quotes", quoteId, "messages"));
+    await setDoc(messageRef, { sender, text, createdAt: new Date().toISOString() });
+  },
+  setStatus: async (quoteId, status) => {
+    requireUser();
+    const quote = get().quotes.find((item) => item.id === quoteId);
+    const shouldDeleteImages = status === "discarded" || status === "completed";
+    if (shouldDeleteImages && quote) {
+      await Promise.all(quote.images.map((image) => deleteObject(ref(getFirebaseStorage(), image.storagePath))));
+    }
+    await updateDoc(doc(getFirebaseDb(), "quotes", quoteId), { status, ...(shouldDeleteImages ? { images: [] } : {}) });
+  },
 }));
