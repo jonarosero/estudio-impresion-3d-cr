@@ -4,7 +4,7 @@ import Image from "next/image";
 import { ArrowLeft, Edit3, Plus, Save, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { categories, formatPrice } from "@/lib/data";
-import type { CategoryId, Product } from "@/lib/types";
+import type { CategoryId, Product, ProductFinish } from "@/lib/types";
 import { useProductStore } from "@/stores/product-store";
 
 const emptyProduct: Omit<Product, "id"> = {
@@ -16,6 +16,8 @@ const emptyProduct: Omit<Product, "id"> = {
   price: 0,
   image: "https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=1200&q=85",
   colors: ["Rosa nube"],
+  colorPresentation: "single",
+  availableFinishes: ["standard"],
   stock: 0,
   weightGrams: 100,
   featured: false,
@@ -41,7 +43,12 @@ export function DashboardProducts() {
   function openEdit(product: Product) {
     const { id, ...values } = product;
     setEditingId(id);
-    setDraft(values);
+    setDraft({
+      ...emptyProduct,
+      ...values,
+      colorPresentation: values.colorPresentation ?? "single",
+      availableFinishes: values.availableFinishes?.length ? values.availableFinishes : ["standard"],
+    });
     setFormOpen(true);
   }
 
@@ -61,13 +68,21 @@ export function DashboardProducts() {
     if (window.confirm(`¿Eliminar ${product.name}? Esta accion no se puede deshacer.`)) remove(product.id);
   }
 
+  function toggleFinish(finish: ProductFinish) {
+    const current = draft.availableFinishes ?? ["standard"];
+    const next = current.includes(finish)
+      ? current.filter((item) => item !== finish)
+      : [...current, finish];
+    setDraft({ ...draft, availableFinishes: next.length ? next : ["standard"] });
+  }
+
   if (formOpen) {
     return (
       <div>
         <button onClick={() => setFormOpen(false)} className="inline-flex items-center gap-2 text-[10px] font-bold text-[#786970]"><ArrowLeft size={13} /> Volver a productos</button>
         <div className="mt-5 flex items-end justify-between"><div><p className="eyebrow">Catalogo</p><h2 className="mt-2 font-display text-4xl font-semibold">{editingId ? "Editar producto" : "Nuevo producto"}</h2><p className="mt-1 text-[10px] text-[#786970]">Precio, inventario, peso logistico y contenido comercial.</p></div></div>
         <div className="mt-7 grid gap-6 xl:grid-cols-[1fr_320px]">
-          <div className="rounded-2xl bg-[#fffdfb] p-6"><div className="grid gap-4 sm:grid-cols-2"><label className="text-[10px] font-bold sm:col-span-2">Nombre<input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold">Slug<input value={draft.slug} onChange={(event) => setDraft({ ...draft, slug: event.target.value })} placeholder="Se genera automaticamente" className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold">Categoria<select value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value as CategoryId })} className={`${inputClass} mt-2`}>{categories.filter((item) => item.id !== "personalizadas").map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label className="text-[10px] font-bold">Precio USD<input value={draft.price || ""} onChange={(event) => setDraft({ ...draft, price: Number(event.target.value) })} type="number" min="0" step="0.01" className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold">Stock<input value={draft.stock} onChange={(event) => setDraft({ ...draft, stock: Number(event.target.value) })} type="number" min="0" className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold">Peso empacado (gramos)<input value={draft.weightGrams} onChange={(event) => setDraft({ ...draft, weightGrams: Number(event.target.value) })} type="number" min="1" className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold">Colores separados por coma<input value={draft.colors.join(", ")} onChange={(event) => setDraft({ ...draft, colors: event.target.value.split(",").map((item) => item.trim()).filter(Boolean) })} className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold sm:col-span-2">Descripcion<textarea value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} rows={5} className={`${inputClass} mt-2 resize-none`} /></label><label className="text-[10px] font-bold sm:col-span-2">URL de imagen<input value={draft.image} onChange={(event) => setDraft({ ...draft, image: event.target.value })} className={`${inputClass} mt-2`} /></label></div><div className="mt-6 flex justify-end gap-2"><button onClick={() => setFormOpen(false)} className="rounded-full border border-[#d8c9cd] px-5 py-3 text-[10px] font-bold">Cancelar</button><button onClick={save} className="inline-flex items-center gap-2 rounded-full bg-[#35282d] px-6 py-3 text-[10px] font-bold text-white"><Save size={13} /> Guardar producto</button></div></div>
+          <div className="rounded-2xl bg-[#fffdfb] p-6"><div className="grid gap-4 sm:grid-cols-2"><label className="text-[10px] font-bold sm:col-span-2">Nombre<input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold">Slug<input value={draft.slug} onChange={(event) => setDraft({ ...draft, slug: event.target.value })} placeholder="Se genera automaticamente" className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold">Categoria<select value={draft.category} onChange={(event) => setDraft({ ...draft, category: event.target.value as CategoryId })} className={`${inputClass} mt-2`}>{categories.filter((item) => item.id !== "personalizadas").map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label><label className="text-[10px] font-bold">Precio USD<input value={draft.price || ""} onChange={(event) => setDraft({ ...draft, price: Number(event.target.value) })} type="number" min="0" step="0.01" className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold">Stock<input value={draft.stock} onChange={(event) => setDraft({ ...draft, stock: Number(event.target.value) })} type="number" min="0" className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold">Peso empacado (gramos)<input value={draft.weightGrams} onChange={(event) => setDraft({ ...draft, weightGrams: Number(event.target.value) })} type="number" min="1" className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold">Colores separados por coma<input value={draft.colors.join(", ")} onChange={(event) => setDraft({ ...draft, colors: event.target.value.split(",").map((item) => item.trim()).filter(Boolean) })} className={`${inputClass} mt-2`} /></label><label className="text-[10px] font-bold sm:col-span-2">Composicion de color<select value={draft.colorPresentation ?? "single"} onChange={(event) => setDraft({ ...draft, colorPresentation: event.target.value as "single" | "multicolor" })} className={`${inputClass} mt-2`}><option value="single">Un solo color por pieza</option><option value="multicolor">Pieza multicolor definida por el estudio</option></select><span className="mt-1 block font-normal text-[#786970]">Esta configuracion se muestra al cliente, pero no se puede modificar desde la ficha.</span></label><fieldset className="sm:col-span-2"><legend className="text-[10px] font-bold">Acabados disponibles para el cliente</legend><div className="mt-2 grid gap-2 sm:grid-cols-3">{(["standard", "hand-painted", "ready-to-paint"] as ProductFinish[]).map((finish) => { const labels: Record<ProductFinish, string> = { standard: "Impresion estandar", "hand-painted": "Pintado a mano (+$4,50)", "ready-to-paint": "Diviertete pintandolo (-$2,00)" }; return <label key={finish} className="flex items-center gap-2 rounded-xl border border-[#e5d8dc] p-3 text-[10px]"><input type="checkbox" checked={(draft.availableFinishes ?? ["standard"]).includes(finish)} onChange={() => toggleFinish(finish)} />{labels[finish]}</label>; })}</div><span className="mt-2 block text-[9px] text-[#786970]">Si solo queda impresion estandar, el cliente solo elegira colores.</span></fieldset><label className="text-[10px] font-bold sm:col-span-2">Descripcion<textarea value={draft.description} onChange={(event) => setDraft({ ...draft, description: event.target.value })} rows={5} className={`${inputClass} mt-2 resize-none`} /></label><label className="text-[10px] font-bold sm:col-span-2">URL de imagen<input value={draft.image} onChange={(event) => setDraft({ ...draft, image: event.target.value })} className={`${inputClass} mt-2`} /></label></div><div className="mt-6 flex justify-end gap-2"><button onClick={() => setFormOpen(false)} className="rounded-full border border-[#d8c9cd] px-5 py-3 text-[10px] font-bold">Cancelar</button><button onClick={save} className="inline-flex items-center gap-2 rounded-full bg-[#35282d] px-6 py-3 text-[10px] font-bold text-white"><Save size={13} /> Guardar producto</button></div></div>
           <aside className="h-fit rounded-2xl bg-[#ead7dc] p-5"><p className="text-[9px] font-bold uppercase tracking-wider text-[#9e5f72]">Vista previa</p><div className="relative mt-4 aspect-square overflow-hidden rounded-2xl bg-white">{draft.image && <Image src={draft.image} alt="Vista previa" fill sizes="320px" className="object-cover" />}</div><p className="mt-4 font-display text-2xl font-semibold">{draft.name || "Nombre del producto"}</p><div className="mt-2 flex justify-between text-xs"><span>{formatPrice(draft.price)}</span><span>{draft.weightGrams} g</span></div></aside>
         </div>
       </div>

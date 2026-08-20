@@ -5,6 +5,8 @@ export type CategoryId =
   | "figuritas"
   | "personalizadas";
 
+export type ProductFinish = "standard" | "hand-painted" | "ready-to-paint";
+
 export type Product = {
   id: string;
   slug: string;
@@ -16,6 +18,8 @@ export type Product = {
   compareAtPrice?: number;
   image: string;
   colors: string[];
+  colorPresentation?: "single" | "multicolor";
+  availableFinishes?: ProductFinish[];
   badge?: string;
   featured?: boolean;
   stock: number;
