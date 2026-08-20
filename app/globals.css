@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f8f1f2;
+  --surface: #fffdfb;
+  --surface-soft: #f3e7e9;
+  --ink: #35282d;
+  --muted: #786970;
+  --rose: #c98698;
+  --rose-dark: #9e5f72;
+  --blush: #eccbd3;
+  --sage: #aeb9a4;
+  --line: #e5d8dc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--ink);
+  font-family: var(--font-sans), Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  outline-color: var(--rose);
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.font-display {
+  font-family: var(--font-display), Georgia, serif;
+}
+
+.page-shell {
+  width: min(1240px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.soft-shadow {
+  box-shadow: 0 20px 60px rgba(77, 51, 61, 0.08);
+}
+
+.eyebrow {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--rose-dark);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--rose-dark);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .page-shell {
+    width: min(100% - 20px, 1240px);
+  }
+}

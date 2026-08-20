@@ -1,0 +1,132 @@
+import type { CategoryId, Product } from "@/lib/types";
+
+export const categories: Array<{
+  id: CategoryId;
+  name: string;
+  description: string;
+}> = [
+  { id: "macetas", name: "Macetas", description: "Formas suaves para rincones vivos." },
+  { id: "hogar", name: "Hogar", description: "Detalles cotidianos con intención." },
+  { id: "organizadores", name: "Organizadores", description: "Orden bonito y funcional." },
+  { id: "figuritas", name: "Figuritas", description: "Pequeñas piezas con personalidad." },
+  { id: "personalizadas", name: "Personalizadas", description: "Tu idea, impresa especialmente." },
+];
+
+export const products: Product[] = [
+  {
+    id: "p1",
+    slug: "maceta-onda",
+    name: "Maceta Onda",
+    shortName: "Onda",
+    description: "Maceta de lineas organicas impresa capa a capa. Ideal para suculentas y espacios serenos.",
+    category: "macetas",
+    price: 18.5,
+    image: "https://images.unsplash.com/photo-1485955900006-10f4d324d411?auto=format&fit=crop&w=1200&q=85",
+    colors: ["Rosa nube", "Marfil", "Salvia"],
+    badge: "Favorita",
+    featured: true,
+    stock: 12,
+  },
+  {
+    id: "p2",
+    slug: "florero-pliegue",
+    name: "Florero Pliegue",
+    shortName: "Pliegue",
+    description: "Un florero escultorico de acabado mate que transforma una sola rama en una composicion.",
+    category: "hogar",
+    price: 24,
+    compareAtPrice: 29,
+    image: "https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=1200&q=85",
+    colors: ["Rosa arcilla", "Arena", "Ciruela"],
+    badge: "Nuevo",
+    featured: true,
+    stock: 8,
+  },
+  {
+    id: "p3",
+    slug: "organizador-nube",
+    name: "Organizador Nube",
+    shortName: "Nube",
+    description: "Bandeja modular para joyas, llaves o escritorio con curvas continuas y tacto sedoso.",
+    category: "organizadores",
+    price: 16.9,
+    image: "https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&w=1200&q=85",
+    colors: ["Rosa nube", "Lavanda", "Marfil"],
+    featured: true,
+    stock: 16,
+  },
+  {
+    id: "p4",
+    slug: "conejita-lola",
+    name: "Conejita Lola",
+    shortName: "Lola",
+    description: "Figurita decorativa de formas redondeadas, perfecta para repisas y habitaciones infantiles.",
+    category: "figuritas",
+    price: 12.5,
+    image: "https://images.unsplash.com/photo-1599443015574-be5fe8a05783?auto=format&fit=crop&w=1200&q=85",
+    colors: ["Rosa nube", "Blanco", "Caramelo"],
+    badge: "Edicion corta",
+    featured: true,
+    stock: 6,
+  },
+  {
+    id: "p5",
+    slug: "maceta-bucle",
+    name: "Maceta Bucle",
+    shortName: "Bucle",
+    description: "Volumen geometrico y ligero para plantas pequenas. Incluye plato interior removible.",
+    category: "macetas",
+    price: 21,
+    image: "https://images.unsplash.com/photo-1509423350716-97f2360af8e4?auto=format&fit=crop&w=1200&q=85",
+    colors: ["Terracota", "Salvia", "Marfil"],
+    stock: 9,
+  },
+  {
+    id: "p6",
+    slug: "porta-incienso-luna",
+    name: "Porta incienso Luna",
+    shortName: "Luna",
+    description: "Una pieza minimalista que recoge la ceniza y acompana tus pausas diarias.",
+    category: "hogar",
+    price: 14,
+    image: "https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=1200&q=85",
+    colors: ["Rosa arcilla", "Negro", "Arena"],
+    stock: 14,
+  },
+  {
+    id: "p7",
+    slug: "organizador-giro",
+    name: "Organizador Giro",
+    shortName: "Giro",
+    description: "Contenedor de escritorio para lapices, brochas o herramientas creativas.",
+    category: "organizadores",
+    price: 19.5,
+    image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?auto=format&fit=crop&w=1200&q=85",
+    colors: ["Lavanda", "Rosa nube", "Salvia"],
+    badge: "Mas vendido",
+    stock: 11,
+  },
+  {
+    id: "p8",
+    slug: "osita-aurora",
+    name: "Osita Aurora",
+    shortName: "Aurora",
+    description: "Figura coleccionable de acabado mate, producida en pequenos lotes y numerada a mano.",
+    category: "figuritas",
+    price: 15.75,
+    image: "https://images.unsplash.com/photo-1559454403-b8fb88521f11?auto=format&fit=crop&w=1200&q=85",
+    colors: ["Rosa nube", "Miel", "Lavanda"],
+    stock: 5,
+  },
+];
+
+export function getProduct(slug: string) {
+  return products.find((product) => product.slug === slug);
+}
+
+export function formatPrice(value: number) {
+  return new Intl.NumberFormat("es-EC", {
+    style: "currency",
+    currency: "USD",
+  }).format(value);
+}
