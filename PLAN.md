@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Construir un prototipo visual responsive de una tienda de productos impresos en 3D, con carrito, cotizaciones personalizadas por WhatsApp y un dashboard administrativo demostrable. El proyecto quedara preparado para una futura conexion con Firebase, DEUNA, Vercel y GitHub sin incluir credenciales.
+Construir un prototipo visual responsive de una tienda de productos impresos en 3D, con carrito, cotizaciones mediante mensajeria interna y un dashboard administrativo demostrable. El proyecto quedara preparado para una futura conexion con Firebase, DEUNA, Vercel y GitHub sin incluir credenciales.
 
 ## Decisiones tecnicas
 
@@ -14,19 +14,19 @@ Construir un prototipo visual responsive de una tienda de productos impresos en 
 - Datos del prototipo: archivos TypeScript locales y persistencia local donde aporte valor.
 - Autenticacion futura: Firebase Authentication con Google.
 - Datos futuros: Cloud Firestore para productos, promociones, pedidos y clientes.
-- Imagenes de productos futuras: Firebase Storage, administradas unicamente desde el dashboard.
+- Imagenes futuras: Firebase Storage para catalogo y referencias temporales de cotizaciones.
 - Pagos futuros: DEUNA Payment Link, creado desde una ruta segura del servidor y confirmado mediante webhook.
 - Despliegue: Vercel conectado al repositorio de GitHub.
 
-## Cotizaciones personalizadas y WhatsApp
+## Cotizaciones personalizadas y mensajeria
 
 - El cliente podra seleccionar solamente imagenes como referencia; no se aceptaran STL, OBJ ni otros archivos 3D.
-- Las imagenes se previsualizaran con URLs locales del navegador y no se subiran a Firebase ni a ningun servidor.
-- La opcion gratuita sera WhatsApp Click to Chat mediante `https://wa.me/NUMERO?text=MENSAJE`.
-- WhatsApp no permite que una web adjunte automaticamente archivos usando Click to Chat. La interfaz abrira el chat con toda la informacion escrita y pedira al cliente adjuntar manualmente las imagenes seleccionadas.
-- En moviles compatibles se puede ofrecer Web Share como mejora progresiva, pero no se puede obligar al sistema a compartir exclusivamente con WhatsApp.
-- No se usaran APIs no oficiales de WhatsApp, porque requieren sesiones automatizadas, pueden dejar de funcionar y pueden provocar el bloqueo del numero.
-- La API oficial de WhatsApp Business Cloud se evaluara solamente si el negocio necesita automatizacion posterior; requiere configuracion en Meta y no elimina todas las condiciones de cobro.
+- Las imagenes se previsualizan antes de crear una solicitud privada.
+- Cliente y administracion conversan dentro de la aplicacion mediante mensajes asociados a la cotizacion.
+- Las referencias se almacenan bajo rutas privadas y temporales en Firebase Storage.
+- Si una cotizacion se descarta, sus imagenes se eliminan inmediatamente.
+- Si se convierte en pedido, se conservan durante produccion y se eliminan al terminar la venta.
+- Una tarea diaria elimina archivos vencidos como mecanismo de respaldo.
 
 ## Identidad visual
 
@@ -43,17 +43,17 @@ Construir un prototipo visual responsive de una tienda de productos impresos en 
 - Detalle de producto con variantes, cantidad y productos relacionados.
 - Carrito lateral y pagina de carrito.
 - Checkout visual preparado para DEUNA.
-- Cotizacion personalizada con formulario, imagenes locales y envio a WhatsApp.
+- Cotizacion personalizada con imagenes y conversacion privada.
 - Login visual con Google y cuenta de cliente.
 
 ## Dashboard
 
 - Resumen con indicadores y actividad reciente.
 - Productos: listado, busqueda, estados y formulario visual de creacion.
-- Promociones: campanas activas y programadas.
+- Promociones: campanas activas y programadas conectadas al banner de inicio.
 - Pedidos: tabla con estados y totales.
-- Cotizaciones: seguimiento de conversaciones iniciadas por WhatsApp.
-- Configuracion: WhatsApp, entregas, DEUNA y Firebase.
+- Cotizaciones: bandeja de mensajes, archivos temporales y conversion a pedido.
+- Configuracion: mensajeria, almacenamiento, entregas, DEUNA y Firebase.
 - El acceso administrativo futuro se validara en servidor mediante Firebase Admin y una lista de usuarios autorizados.
 
 ## Modelo de datos futuro
@@ -61,7 +61,7 @@ Construir un prototipo visual responsive de una tienda de productos impresos en 
 - `products`: nombre, slug, descripcion, categoria, precio, precio anterior, variantes, stock, imagenes y estado.
 - `promotions`: titulo, descuento, fechas, productos o categorias y estado.
 - `orders`: cliente, lineas, subtotal, entrega, total, estado y referencia DEUNA.
-- `quotes`: datos del cliente, descripcion, medidas, cantidad, estado y referencia de conversacion; no almacenara imagenes enviadas por WhatsApp.
+- `quotes`: datos del cliente, descripcion, medidas, cantidad, estado, mensajes, rutas de imagenes y fecha de expiracion.
 - `users`: perfil basico, direcciones y rol.
 
 ## Seguridad futura
@@ -78,7 +78,7 @@ Construir un prototipo visual responsive de una tienda de productos impresos en 
 2. Crear modelos, datos demo y estado persistente del carrito.
 3. Construir layout, inicio, catalogo y detalle de producto.
 4. Implementar carrito, checkout visual y estados de interaccion.
-5. Crear cotizacion con imagenes locales y WhatsApp Click to Chat.
+5. Crear cotizacion con imagenes temporales y mensajeria interna.
 6. Construir login visual, cuenta y dashboard.
 7. Preparar adaptadores y documentacion para Firebase y DEUNA.
 8. Agregar CI de GitHub, metadatos, README y configuracion de Vercel.
@@ -89,7 +89,7 @@ Construir un prototipo visual responsive de una tienda de productos impresos en 
 
 - La tienda carga correctamente en escritorio y movil.
 - Se puede navegar, filtrar productos y gestionar un carrito persistente.
-- La cotizacion valida datos, muestra imagenes sin subirlas y abre WhatsApp con el mensaje preparado.
+- La cotizacion valida datos, muestra referencias y abre una conversacion privada.
 - El dashboard presenta los flujos principales con datos demostrativos.
 - El repositorio no contiene secretos y pasa lint, comprobacion de tipos y build.
 - El README explica como ejecutar, configurar y evolucionar el proyecto.

@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
-import { CartDrawer } from "@/components/cart-drawer";
-import { Footer } from "@/components/footer";
-import { Header } from "@/components/header";
+import { SiteChrome } from "@/components/site-chrome";
 
 const display = Cormorant_Garamond({
   subsets: ["latin"],
@@ -28,10 +26,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="es" className={`${display.variable} ${sans.variable}`}>
       <body>
-        <Header />
-        <CartDrawer />
-        {children}
-        <Footer />
+        <SiteChrome>{children}</SiteChrome>
       </body>
     </html>
   );

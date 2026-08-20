@@ -26,7 +26,17 @@ service cloud.firestore {
     }
 
     match /quotes/{quoteId} {
-      allow read, write: if isAdmin();
+      allow create: if signedIn() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() || (signedIn() && resource.data.userId == request.auth.uid);
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read, create: if isAdmin()
+          || (signedIn()
+            && get(/databases/$(database)/documents/quotes/$(quoteId)).data.userId == request.auth.uid);
+        allow update, delete: if false;
+      }
     }
 
     match /{document=**} {

@@ -110,7 +110,7 @@ export default function Home() {
           <Box className="absolute -left-5 -top-8 size-36 rotate-12 text-white/15" strokeWidth={1} />
           <p className="eyebrow">Solo para ti</p>
           <h2 className="mx-auto mt-3 max-w-2xl font-display text-5xl font-semibold leading-[0.95] sm:text-7xl">¿Tienes una idea dando vueltas?</h2>
-          <p className="mx-auto mt-5 max-w-lg text-sm leading-6 text-[#5f4b53]">Envia tus imagenes de referencia por WhatsApp y conversemos sobre como hacerla realidad.</p>
+          <p className="mx-auto mt-5 max-w-lg text-sm leading-6 text-[#5f4b53]">Sube tus imagenes de referencia y conversa de forma privada con el estudio para hacerla realidad.</p>
           <Link href="/personalizados" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[#35282d] px-7 py-4 text-sm font-bold text-white">Pedir una cotizacion <ArrowRight size={16} /></Link>
         </div>
       </section>

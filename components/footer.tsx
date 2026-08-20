@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Camera, MessageCircle } from "lucide-react";
+import { Camera, MessagesSquare } from "lucide-react";
 import { Logo } from "@/components/logo";
 
 export function Footer() {
@@ -24,9 +24,9 @@ export function Footer() {
         <div>
           <p className="eyebrow">Hablemos</p>
           <div className="mt-5 flex gap-3">
-            <a href="https://wa.me/593999999999" target="_blank" rel="noreferrer" className="grid size-10 place-items-center rounded-full border border-[#cdbbc0]" aria-label="WhatsApp">
-              <MessageCircle size={17} />
-            </a>
+            <Link href="/personalizados" className="grid size-10 place-items-center rounded-full border border-[#cdbbc0]" aria-label="Mensajes y cotizaciones">
+              <MessagesSquare size={17} />
+            </Link>
             <a href="#" className="grid size-10 place-items-center rounded-full border border-[#cdbbc0]" aria-label="Instagram">
               <Camera size={17} />
             </a>

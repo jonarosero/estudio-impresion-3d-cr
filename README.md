@@ -1,6 +1,6 @@
 # Estudio de Impresion 3D C&R
 
-Prototipo responsive de una tienda de objetos impresos en 3D con catalogo, carrito persistente, cotizaciones por WhatsApp y dashboard administrativo.
+Prototipo responsive de una tienda de objetos impresos en 3D con catalogo, carrito persistente, cotizaciones por mensajeria interna y dashboard administrativo.
 
 ## Funcionalidades
 
@@ -9,8 +9,8 @@ Prototipo responsive de una tienda de objetos impresos en 3D con catalogo, carri
 - Detalle de producto con colores, cantidad y productos relacionados.
 - Carrito persistente en el navegador.
 - Checkout visual preparado para DEUNA.
-- Cotizaciones personalizadas mediante WhatsApp.
-- Seleccion y previsualizacion local de imagenes sin subirlas a un servidor.
+- Cotizaciones personalizadas mediante conversaciones privadas dentro de la tienda.
+- Imagenes temporales con eliminacion al descartar la solicitud o terminar la venta.
 - Login visual preparado para Google y Firebase Authentication.
 - Dashboard para productos, promociones, pedidos, cotizaciones y configuracion.
 
@@ -29,17 +29,8 @@ Requisitos: Node.js 20 o superior.
 
 ```bash
 npm install
-cp .env.example .env.local
 npm run dev
 ```
-
-En Windows PowerShell, crea `.env.local` a partir de `.env.example` con el metodo que prefieras y configura:
-
-```env
-NEXT_PUBLIC_WHATSAPP_NUMBER=593999999999
-```
-
-El numero debe incluir codigo de pais y no debe contener `+`, espacios ni guiones.
 
 ## Verificacion
 
@@ -49,18 +40,16 @@ npm run typecheck
 npm run build
 ```
 
-## WhatsApp e imagenes
+## Mensajeria e imagenes temporales
 
-El proyecto usa el enlace gratuito oficial `wa.me`. El formulario crea un mensaje con los datos de la solicitud y abre WhatsApp.
+Cada cotizacion abre una conversacion privada entre cliente y administracion. En produccion, las referencias se almacenaran bajo una ruta aislada por usuario y solicitud.
 
-Los navegadores no pueden adjuntar automaticamente archivos a una conversacion de WhatsApp mediante Click to Chat. Por esa razon:
+- Al descartar una cotizacion se eliminan sus imagenes.
+- Al convertirla en pedido, las imagenes se conservan durante la produccion.
+- Al terminar la venta se eliminan las imagenes.
+- Una tarea programada elimina archivos vencidos como mecanismo de respaldo.
 
-- Las imagenes se muestran mediante URLs `blob:` locales.
-- Las imagenes no se suben a Firebase ni a otro servidor.
-- El cliente debe adjuntar manualmente las referencias una vez abierto el chat.
-- No se usan APIs no oficiales ni automatizaciones que puedan bloquear el numero.
-
-Consulta [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) para comparar alternativas.
+Consulta [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) para el ciclo de vida completo.
 
 ## Integraciones futuras
 
@@ -68,7 +57,7 @@ Consulta [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) para comparar alternativas
 
 - Authentication con Google para clientes y administradores.
 - Firestore para productos, promociones, pedidos y estados de cotizaciones.
-- Storage solamente para imagenes del catalogo subidas por administradores.
+- Storage para imagenes del catalogo y referencias temporales de cotizaciones.
 - Firebase Admin en rutas de servidor para comprobar permisos.
 
 Las reglas iniciales estan en `firebase/` y deben adaptarse al modelo definitivo antes de produccion.
