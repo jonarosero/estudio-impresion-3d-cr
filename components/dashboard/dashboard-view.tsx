@@ -414,6 +414,7 @@ function QuotesPanel() {
   const setStatus = useQuoteStore((state) => state.setStatus);
   const [selectedId, setSelectedId] = useState(quotes[0]?.id ?? "");
   const [reply, setReply] = useState("");
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [search, setSearch] = useState("");
   const normalizedSearch = search.trim().toLowerCase();
   const filteredQuotes = quotes.filter((quote) =>
@@ -437,10 +438,11 @@ function QuotesPanel() {
     completed: "Venta terminada",
   };
 
-  function sendReply() {
-    if (!selected || !reply.trim()) return;
-    addMessage(selected.id, "admin", reply.trim());
+  async function sendReply() {
+    if (!selected || (!reply.trim() && !attachments.length)) return;
+    await addMessage(selected.id, "admin", reply.trim(), attachments);
     setReply("");
+    setAttachments([]);
   }
 
   return (
@@ -556,6 +558,7 @@ function QuotesPanel() {
                   )}
                 >
                   <p>{message.text}</p>
+                  {message.images?.length ? <div className="mt-2 grid grid-cols-3 gap-2">{message.images.map((image) => <a key={image.id} href={image.url} target="_blank" rel="noreferrer" className="relative aspect-square overflow-hidden rounded-lg"><Image src={image.url} alt={image.name} fill unoptimized className="object-cover" /></a>)}</div> : null}
                   <span
                     className={cn(
                       "mt-1 block text-[8px]",
@@ -585,6 +588,7 @@ function QuotesPanel() {
                   Enviar
                 </button>
               </div>
+              <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#d8c9cd] px-3 py-2 text-[9px] font-bold text-[#9e5f72]">Adjuntar imágenes<input type="file" accept="image/*" multiple className="sr-only" onChange={(event) => setAttachments(Array.from(event.target.files ?? []).filter((file) => file.size <= 8 * 1024 * 1024).slice(0, 4))} /></label>{attachments.length > 0 && <span className="ml-2 text-[9px] text-[#786970]">{attachments.length} imagen(es) listas para enviar</span>}
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   onClick={() => setStatus(selected.id, "quoted")}

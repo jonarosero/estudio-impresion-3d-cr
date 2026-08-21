@@ -19,6 +19,7 @@ export type QuoteMessage = {
   sender: "customer" | "admin";
   text: string;
   createdAt: string;
+  images?: QuoteImage[];
 };
 
 export type Quote = {
@@ -34,16 +35,17 @@ export type Quote = {
   messages: QuoteMessage[];
   createdAt: string;
   expiresAt: string;
+  userId: string;
 };
 
-export type NewQuote = Omit<Quote, "id" | "status" | "images" | "messages" | "createdAt" | "expiresAt">;
+export type NewQuote = Omit<Quote, "id" | "userId" | "status" | "images" | "messages" | "createdAt" | "expiresAt">;
 
 type QuoteState = {
   quotes: Quote[];
   startListening: (userId: string, isAdmin: boolean) => void;
   stopListening: () => void;
   addQuote: (quote: NewQuote, files: File[]) => Promise<string>;
-  addMessage: (quoteId: string, sender: QuoteMessage["sender"], text: string) => Promise<void>;
+  addMessage: (quoteId: string, sender: QuoteMessage["sender"], text: string, files?: File[]) => Promise<void>;
   setStatus: (quoteId: string, status: QuoteStatus) => Promise<void>;
 };
 
@@ -76,6 +78,7 @@ function toQuote(id: string, data: Record<string, unknown>, messages: QuoteMessa
     messages,
     createdAt: formattedDate(String(data.createdAt ?? "")),
     expiresAt: formattedDate(String(data.expiresAt ?? "")),
+    userId: String(data.userId ?? ""),
   };
 }
 
@@ -120,6 +123,7 @@ export const useQuoteStore = create<QuoteState>((set, get) => ({
             sender: messageDoc.data().sender as QuoteMessage["sender"],
             text: String(messageDoc.data().text ?? ""),
             createdAt: formattedDate(String(messageDoc.data().createdAt ?? "")),
+            images: (messageDoc.data().images as QuoteImage[] | undefined) ?? [],
           }));
           set((state) => ({
             quotes: state.quotes.map((quote) => quote.id === quoteDoc.id ? { ...quote, messages } : quote),
@@ -157,10 +161,18 @@ export const useQuoteStore = create<QuoteState>((set, get) => ({
       throw error;
     }
   },
-  addMessage: async (quoteId, sender, text) => {
+  addMessage: async (quoteId, sender, text, files = []) => {
     requireUser();
+    const quote = get().quotes.find((item) => item.id === quoteId);
+    if (!quote) throw new Error("No se encontró la cotización.");
     const messageRef = doc(collection(getFirebaseDb(), "quotes", quoteId, "messages"));
-    await setDoc(messageRef, { sender, text, createdAt: new Date().toISOString() });
+    const images: QuoteImage[] = [];
+    for (const file of files) {
+      const imageRef = ref(getFirebaseStorage(), `quotes/${quote.userId}/${quoteId}/messages/${messageRef.id}-${crypto.randomUUID()}-${file.name}`);
+      await uploadBytes(imageRef, file, { contentType: file.type });
+      images.push({ id: crypto.randomUUID(), name: file.name, url: await getDownloadURL(imageRef), storagePath: imageRef.fullPath });
+    }
+    await setDoc(messageRef, { sender, text, images, createdAt: new Date().toISOString() });
   },
   setStatus: async (quoteId, status) => {
     requireUser();

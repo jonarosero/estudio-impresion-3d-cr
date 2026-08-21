@@ -15,8 +15,8 @@ service firebase.storage {
 
     match /quotes/{userId}/{quoteId}/{fileName} {
       allow read: if isAdmin() || (request.auth != null && request.auth.uid == userId);
-      allow create: if request.auth != null
-        && request.auth.uid == userId
+      allow create: if isAdmin() || (request.auth != null
+        && request.auth.uid == userId)
         && request.resource.size < 8 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
       allow update: if false;
