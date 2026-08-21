@@ -7,6 +7,8 @@ import { getFirebaseAuth, getFirebaseDb, isFirebaseConfigured } from "@/lib/fire
 import { useAccountStore } from "@/stores/account-store";
 import { useQuoteStore } from "@/stores/quote-store";
 import { useOrderStore } from "@/stores/order-store";
+import { useCartStore } from "@/stores/cart-store";
+import { useFavoriteStore } from "@/stores/favorite-store";
 
 export function FirebaseAuthProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const setAccount = useAccountStore((state) => state.setAccount);
@@ -15,6 +17,8 @@ export function FirebaseAuthProvider({ children }: Readonly<{ children: React.Re
   const stopQuoteListening = useQuoteStore((state) => state.stopListening);
   const startOrderListening = useOrderStore((state) => state.startListening);
   const stopOrderListening = useOrderStore((state) => state.stopListening);
+  const startCartListening = useCartStore((state) => state.startListening);
+  const startFavoriteListening = useFavoriteStore((state) => state.startListening);
 
   useEffect(() => {
     if (!isFirebaseConfigured) return;
@@ -43,6 +47,8 @@ export function FirebaseAuthProvider({ children }: Readonly<{ children: React.Re
       const isAdmin = token.claims.admin === true;
       startQuoteListening(user.uid, isAdmin);
       startOrderListening(user.uid, isAdmin);
+      const stopCartListening = startCartListening(user.uid);
+      const stopFavoriteListening = startFavoriteListening(user.uid);
       setAccount({
         id: user.uid,
         name: user.displayName ?? "Cliente J&J",
@@ -50,13 +56,14 @@ export function FirebaseAuthProvider({ children }: Readonly<{ children: React.Re
         role: isAdmin ? "admin" : "customer",
       });
       setLoading(false);
+      return () => { stopCartListening(); stopFavoriteListening(); };
     });
     return () => {
       unsubscribe();
       stopQuoteListening();
       stopOrderListening();
     };
-  }, [setAccount, setLoading, startOrderListening, startQuoteListening, stopOrderListening, stopQuoteListening]);
+  }, [setAccount, setLoading, startCartListening, startFavoriteListening, startOrderListening, startQuoteListening, stopOrderListening, stopQuoteListening]);
 
   return children;
 }

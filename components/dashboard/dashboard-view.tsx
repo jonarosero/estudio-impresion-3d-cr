@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { collection, onSnapshot } from "firebase/firestore";
 import { PromotionsPanel } from "@/components/dashboard/promotions-panel";
 import { SettingsPanel } from "@/components/dashboard/settings-panel";
 import { DashboardProducts } from "@/components/dashboard/products-panel";
@@ -33,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { useQuoteStore, type QuoteStatus } from "@/stores/quote-store";
 import { useAccountStore } from "@/stores/account-store";
 import { useOrderStore } from "@/stores/order-store";
+import { getFirebaseDb } from "@/lib/firebase/client";
 
 type Tab =
   | "resumen"
@@ -125,12 +127,6 @@ export function DashboardView() {
               </button>
             ))}
           </nav>
-          <div className="mt-8 rounded-2xl bg-white/5 p-4">
-            <p className="text-[10px] font-bold">Modo demostracion</p>
-            <p className="mt-2 text-[9px] leading-4 text-white/40">
-              Datos conectados a Firebase en tiempo real.
-            </p>
-          </div>
           <Link
             href="/"
             className="absolute bottom-6 left-5 right-5 flex items-center justify-between rounded-xl border border-white/10 px-4 py-3 text-[10px] font-bold text-white/70"
@@ -425,6 +421,7 @@ function QuotesPanel() {
   const quotes = useQuoteStore((state) => state.quotes);
   const addMessage = useQuoteStore((state) => state.addMessage);
   const setStatus = useQuoteStore((state) => state.setStatus);
+  const createOrderFromQuote = useOrderStore((state) => state.createOrderFromQuote);
   const [selectedId, setSelectedId] = useState(quotes[0]?.id ?? "");
   const [reply, setReply] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
@@ -610,7 +607,7 @@ function QuotesPanel() {
                   Marcar cotizada
                 </button>
                 <button
-                  onClick={() => setStatus(selected.id, "converted")}
+                  onClick={() => void createOrderFromQuote(selected)}
                   className="rounded-full bg-[#e7eee3] px-3 py-2 text-[8px] font-bold text-[#52704b]"
                 >
                   Convertir en pedido
@@ -639,6 +636,20 @@ function QuotesPanel() {
 }
 
 function CustomersPanel() {
+  const orders = useOrderStore((state) => state.orders);
+  const [customers, setCustomers] = useState<Array<{ id: string; name: string; email: string; phone: string; billingName: string; taxId: string; billingAddress: string; shippingAddress: string; createdAt: string }>>([]);
+  const [search, setSearch] = useState("");
+  const [selectedId, setSelectedId] = useState("");
+  useEffect(() => onSnapshot(collection(getFirebaseDb(), "users"), (snapshot) => setCustomers(snapshot.docs.map((item) => ({ id: item.id, name: String(item.data().name ?? "Cliente J&J"), email: String(item.data().email ?? ""), phone: String(item.data().phone ?? ""), billingName: String(item.data().billingName ?? ""), taxId: String(item.data().taxId ?? ""), billingAddress: String(item.data().billingAddress ?? ""), shippingAddress: String(item.data().shippingAddress ?? ""), createdAt: String(item.data().createdAt ?? "") })))), []);
+  const filtered = customers.filter((customer) => `${customer.name} ${customer.email} ${customer.phone}`.toLowerCase().includes(search.toLowerCase()));
+  const selected = filtered.find((customer) => customer.id === selectedId) ?? filtered[0];
+  const customerOrders = selected ? orders.filter((order) => order.userId === selected.id) : [];
+  return <><PanelHeading title="Clientes" subtitle="Datos reales de cuentas, pedidos y facturación" /><div className="mt-6 grid gap-5 xl:grid-cols-[1fr_360px]"><div className="overflow-hidden rounded-2xl bg-[#fffdfb]"><label className="relative m-4 block"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9e5f72]" size={14} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar por nombre, correo o teléfono" className="w-full rounded-xl border border-[#e5d8dc] py-2.5 pl-9 pr-3 text-[10px]" /></label>{filtered.map((customer) => { const customerOrders = orders.filter((order) => order.userId === customer.id); const total = customerOrders.reduce((sum, order) => sum + order.total, 0); return <button key={customer.id} onClick={() => setSelectedId(customer.id)} className={cn("grid w-full grid-cols-[1fr_auto] items-center gap-4 border-t border-[#eee5e7] p-5 text-left md:grid-cols-[1.5fr_1.5fr_.6fr_.7fr_auto]", selected?.id === customer.id && "bg-[#faf1f3]")}><div><p className="text-xs font-bold">{customer.name}</p><p className="mt-1 text-[9px] text-[#91848a]">desde {customer.createdAt ? new Date(customer.createdAt).toLocaleDateString("es-EC") : "sin fecha"}</p></div><span className="hidden text-[10px] md:block">{customer.email}<br />{customer.phone}</span><span className="hidden text-[10px] md:block">{customerOrders.length}</span><span className="hidden text-[10px] font-bold md:block">{formatPrice(total)}</span><ChevronRight size={13} className="text-[#9e5f72]" /></button>; })}{!filtered.length && <p className="p-5 text-center text-[10px] text-[#786970]">No se encontraron clientes.</p>}</div>{selected && <aside className="h-fit rounded-2xl bg-[#fffdfb] p-6"><h3 className="font-display text-2xl font-semibold">{selected.name}</h3><p className="mt-1 text-[10px] text-[#786970]">{selected.email} · {selected.phone || "Sin teléfono"}</p><div className="mt-5 border-t border-[#eee5e7] pt-4 text-[10px]"><p className="font-bold">Facturación</p><p className="mt-2">{selected.billingName || "Sin datos"}</p><p className="text-[#786970]">{selected.taxId} {selected.billingAddress}</p></div><div className="mt-5 border-t border-[#eee5e7] pt-4 text-[10px]"><p className="font-bold">Entrega</p><p className="mt-2 text-[#786970]">{selected.shippingAddress || "Sin dirección"}</p></div><p className="mt-5 border-t border-[#eee5e7] pt-4 text-[10px]">{customerOrders.length} pedido(s) · <strong>{formatPrice(customerOrders.reduce((sum, order) => sum + order.total, 0))}</strong></p></aside>}</div></>;
+}
+
+// Kept temporarily as a visual reference while the real Firestore panel rolls out.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function LegacyCustomersPanel() {
   const customers = [
     {
       id: "CL-0184",

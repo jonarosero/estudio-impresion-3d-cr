@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Heart } from "lucide-react";
 import { AddToCart } from "@/components/cart/add-to-cart";
+import { FavoriteButton } from "@/components/product/favorite-button";
 import { categories, formatPrice } from "@/lib/data";
 import type { Product } from "@/lib/types";
 
@@ -25,9 +25,7 @@ export function ProductCard({ product }: { product: Product }) {
             {product.badge}
           </span>
         )}
-        <button className="focus-ring absolute right-3 top-3 z-20 grid size-9 place-items-center rounded-full bg-[#fffdfb]/90 backdrop-blur" aria-label={`Guardar ${product.name}`}>
-          <Heart size={15} />
-        </button>
+        <FavoriteButton productId={product.id} productName={product.name} />
         <div className="absolute bottom-3 right-3 z-20 translate-y-2 opacity-0 transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 max-md:translate-y-0 max-md:opacity-100">
           <AddToCart product={product} compact />
         </div>

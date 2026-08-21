@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerAuth } from "@/lib/firebase/admin";
 
+export const runtime = "nodejs";
+
 const cookieName = "jj-session";
 const maxAge = 60 * 60 * 24 * 5;
 

@@ -46,6 +46,6 @@ export function Header() {
 }
 
 function AccountMenu({ isAdmin, onClose, onSignOut }: { isAdmin: boolean; onClose: () => void; onSignOut: () => void }) {
-  const customerLinks = [{ href: "/cuenta", label: "Perfil" }, { href: "/cuenta/pedidos", label: "Pedidos" }, { href: "/notificaciones", label: "Notificaciones" }, { href: "/cuenta?seccion=favoritos", label: "Favoritos" }, { href: "/cuenta/cotizaciones", label: "Chat de personalizados" }];
+  const customerLinks = [{ href: "/cuenta", label: "Perfil" }, { href: "/cuenta/pedidos", label: "Pedidos" }, { href: "/notificaciones", label: "Notificaciones" }, { href: "/cuenta/favoritos", label: "Favoritos" }, { href: "/cuenta/cotizaciones", label: "Chat de personalizados" }];
   return <div className="absolute right-0 top-12 w-56 rounded-2xl border border-[#e5d8dc] bg-[#fffdfb] p-2 shadow-xl">{customerLinks.map((item) => <Link key={item.href} href={item.href} onClick={onClose} className="block rounded-xl px-3 py-2.5 text-xs font-bold hover:bg-[#f3e7e9]">{item.label}</Link>)}{isAdmin && <Link href="/dashboard" onClick={onClose} className="mt-1 block rounded-xl bg-[#35282d] px-3 py-2.5 text-xs font-bold text-white">Administración</Link>}<button onClick={() => { onClose(); onSignOut(); }} className="mt-1 w-full rounded-xl border-t border-[#e5d8dc] px-3 py-2.5 text-left text-xs font-bold text-[#9e5f72]">Cerrar sesión</button></div>;
 }

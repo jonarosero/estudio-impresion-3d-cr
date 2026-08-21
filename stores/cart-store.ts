@@ -2,7 +2,14 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { doc, onSnapshot, setDoc } from "firebase/firestore";
 import type { CartLine, Product } from "@/lib/types";
+import { getFirebaseAuth, getFirebaseDb } from "@/lib/firebase/client";
+
+function saveCart(lines: CartLine[]) {
+  const userId = getFirebaseAuth().currentUser?.uid;
+  if (userId) void setDoc(doc(getFirebaseDb(), "users", userId), { cart: lines }, { merge: true });
+}
 
 type CartState = {
   lines: CartLine[];
@@ -13,11 +20,12 @@ type CartState = {
   clear: () => void;
   open: () => void;
   close: () => void;
+  startListening: (userId: string) => () => void;
 };
 
 export const useCartStore = create<CartState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       lines: [],
       isOpen: false,
       add: (product, color = product.colors[0], quantity = 1) =>
@@ -30,25 +38,38 @@ export const useCartStore = create<CartState>()(
                 line === existing ? { ...line, quantity: line.quantity + quantity } : line,
               )
             : [...state.lines, { product, color, quantity }];
+          saveCart(lines);
           return { lines, isOpen: true };
-        }),
+       }),
       remove: (productId, color) =>
-        set((state) => ({
-          lines: state.lines.filter(
+        set((state) => {
+          const lines = state.lines.filter(
             (line) => !(line.product.id === productId && line.color === color),
-          ),
-        })),
+          );
+          saveCart(lines);
+          return { lines };
+        }),
       setQuantity: (productId, color, quantity) =>
-        set((state) => ({
-          lines: state.lines.map((line) =>
+        set((state) => {
+          const lines = state.lines.map((line) =>
             line.product.id === productId && line.color === color
               ? { ...line, quantity: Math.max(1, quantity) }
               : line,
-          ),
-        })),
-      clear: () => set({ lines: [] }),
+          );
+          saveCart(lines);
+          return { lines };
+        }),
+      clear: () => { saveCart([]); set({ lines: [] }); },
       open: () => set({ isOpen: true }),
       close: () => set({ isOpen: false }),
+      startListening: (userId) => {
+        const userRef = doc(getFirebaseDb(), "users", userId);
+        return onSnapshot(userRef, (snapshot) => {
+          const remoteLines = snapshot.data()?.cart as CartLine[] | undefined;
+          if (remoteLines) set({ lines: remoteLines });
+          else void setDoc(userRef, { cart: get().lines }, { merge: true });
+        });
+      },
     }),
     {
       name: "cr-cart",

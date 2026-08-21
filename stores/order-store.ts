@@ -1,6 +1,7 @@
 "use client";
 
-import { collection, doc, onSnapshot, query, setDoc, where } from "firebase/firestore";
+import { collection, doc, onSnapshot, query, setDoc, where, writeBatch } from "firebase/firestore";
+import type { Quote } from "@/stores/quote-store";
 import { create } from "zustand";
 import type { CartLine } from "@/lib/types";
 import { getFirebaseAuth, getFirebaseDb } from "@/lib/firebase/client";
@@ -27,6 +28,7 @@ type OrderState = {
   startListening: (userId: string, isAdmin: boolean) => void;
   stopListening: () => void;
   createOrder: (details: Pick<Order, "customer" | "email" | "phone" | "shippingAddress" | "city" | "reference">, lines: CartLine[]) => Promise<string>;
+  createOrderFromQuote: (quote: Quote) => Promise<string>;
 };
 
 let unsubscribe: (() => void) | undefined;
@@ -52,6 +54,15 @@ export const useOrderStore = create<OrderState>((set) => ({
     const subtotal = lines.reduce((total, line) => total + line.unitPrice * line.quantity, 0);
     const orderRef = doc(collection(getFirebaseDb(), "orders"));
     await setDoc(orderRef, { id: orderRef.id, userId: user.uid, ...details, lines, subtotal, total: subtotal, status: "pending_payment", paymentStatus: "pending", createdAt: new Date().toISOString() });
+    return orderRef.id;
+  },
+  createOrderFromQuote: async (quote) => {
+    const orderRef = doc(collection(getFirebaseDb(), "orders"));
+    const now = new Date().toISOString();
+    const batch = writeBatch(getFirebaseDb());
+    batch.set(orderRef, { id: orderRef.id, userId: quote.userId, customer: quote.customer, email: "", phone: quote.phone, shippingAddress: "", city: "", reference: `Cotización ${quote.id}: ${quote.description}`, lines: [{ productId: quote.id, name: "Producto personalizado", color: quote.color, quantity: quote.quantity, unitPrice: 0, weightGrams: 0 }], subtotal: 0, total: 0, status: "pending_payment", paymentStatus: "pending", createdAt: now, quoteId: quote.id });
+    batch.update(doc(getFirebaseDb(), "quotes", quote.id), { status: "converted", orderId: orderRef.id, convertedAt: now });
+    await batch.commit();
     return orderRef.id;
   },
 }));
