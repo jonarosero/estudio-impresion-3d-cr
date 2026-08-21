@@ -1,5 +1,6 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 
 function adminApp() {
   const value = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
@@ -10,4 +11,8 @@ function adminApp() {
 
 export function getServerAuth() {
   return getAuth(adminApp());
+}
+
+export function getServerDb() {
+  return getFirestore(adminApp());
 }

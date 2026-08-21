@@ -35,6 +35,7 @@ import { useQuoteStore, type QuoteStatus } from "@/stores/quote-store";
 import { useAccountStore } from "@/stores/account-store";
 import { useOrderStore } from "@/stores/order-store";
 import { getFirebaseDb } from "@/lib/firebase/client";
+import { getFirebaseAuth } from "@/lib/firebase/client";
 
 type Tab =
   | "resumen"
@@ -421,11 +422,14 @@ function QuotesPanel() {
   const quotes = useQuoteStore((state) => state.quotes);
   const addMessage = useQuoteStore((state) => state.addMessage);
   const setStatus = useQuoteStore((state) => state.setStatus);
-  const createOrderFromQuote = useOrderStore((state) => state.createOrderFromQuote);
   const [selectedId, setSelectedId] = useState(quotes[0]?.id ?? "");
   const [reply, setReply] = useState("");
   const [attachments, setAttachments] = useState<File[]>([]);
   const [search, setSearch] = useState("");
+  const [unitPrice, setUnitPrice] = useState("");
+  const [shippingCost, setShippingCost] = useState("0");
+  const [converting, setConverting] = useState(false);
+  const [conversionMessage, setConversionMessage] = useState("");
   const normalizedSearch = search.trim().toLowerCase();
   const filteredQuotes = quotes.filter((quote) =>
     [
@@ -453,6 +457,20 @@ function QuotesPanel() {
     await addMessage(selected.id, "admin", reply.trim(), attachments);
     setReply("");
     setAttachments([]);
+  }
+  const subtotal = (Number(unitPrice) || 0) * (selected?.quantity ?? 0);
+  const total = subtotal + (Number(shippingCost) || 0);
+  async function convertQuote() {
+    if (!selected) return;
+    setConverting(true); setConversionMessage("");
+    try {
+      const token = await getFirebaseAuth().currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/quotes/${selected.id}/convert`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${token ?? ""}` }, body: JSON.stringify({ unitPrice: Number(unitPrice), shippingCost: Number(shippingCost) }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error ?? "No fue posible convertir la cotización.");
+      setConversionMessage(`Pedido ${result.orderId} creado correctamente.`);
+    } catch (error) { setConversionMessage(error instanceof Error ? error.message : "No fue posible convertir la cotización."); }
+    finally { setConverting(false); }
   }
 
   return (
@@ -606,12 +624,7 @@ function QuotesPanel() {
                 >
                   Marcar cotizada
                 </button>
-                <button
-                  onClick={() => void createOrderFromQuote(selected)}
-                  className="rounded-full bg-[#e7eee3] px-3 py-2 text-[8px] font-bold text-[#52704b]"
-                >
-                  Convertir en pedido
-                </button>
+                {selected.status !== "converted" && <div className="flex flex-wrap items-center gap-2 rounded-xl bg-[#e7eee3] p-2 text-[9px]"><input value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} type="number" min="0" step="0.01" placeholder="Precio/u." className="w-20 rounded-lg border border-[#c8d5c1] bg-white px-2 py-1.5" /><input value={shippingCost} onChange={(event) => setShippingCost(event.target.value)} type="number" min="0" step="0.01" placeholder="Envío" className="w-16 rounded-lg border border-[#c8d5c1] bg-white px-2 py-1.5" /><span>Subt. {formatPrice(subtotal)} · Total {formatPrice(total)}</span><button disabled={converting || !unitPrice || Number(unitPrice) <= 0} onClick={() => void convertQuote()} className="rounded-full bg-[#52704b] px-3 py-2 font-bold text-white disabled:opacity-50">{converting ? "Convirtiendo..." : "Convertir"}</button></div>}
                 <button
                   onClick={() => setStatus(selected.id, "discarded")}
                   className="rounded-full bg-[#f4e5e7] px-3 py-2 text-[8px] font-bold text-[#9e5f72]"
@@ -627,6 +640,7 @@ function QuotesPanel() {
                   </button>
                 )}
               </div>
+              {conversionMessage && <p className="mt-2 text-[9px] font-bold text-[#52704b]">{conversionMessage}</p>}
             </div>
           </div>
         )}
