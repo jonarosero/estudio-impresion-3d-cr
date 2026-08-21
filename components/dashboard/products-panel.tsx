@@ -74,6 +74,7 @@ export function DashboardProducts() {
   const [formOpen, setFormOpen] = useState(false);
   const [draft, setDraft] = useState<Omit<Product, "id">>(emptyProduct);
   const [search, setSearch] = useState("");
+  const [saveError, setSaveError] = useState("");
   const normalizedSearch = search.trim().toLowerCase();
   const filteredProducts = products.filter((product) =>
     [product.name, product.slug, product.category].some((value) =>
@@ -122,7 +123,7 @@ export function DashboardProducts() {
     setFormOpen(true);
   }
 
-  function save() {
+  async function save() {
     if (!draft.name.trim() || draft.price <= 0 || draft.weightGrams <= 0)
       return;
     const product = {
@@ -136,9 +137,14 @@ export function DashboardProducts() {
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/(^-|-$)/g, ""),
     };
-    if (editingId) update(editingId, product);
-    else add(product);
-    setFormOpen(false);
+    try {
+      setSaveError("");
+      if (editingId) await update(editingId, product);
+      else await add(product);
+      setFormOpen(false);
+    } catch {
+      setSaveError("No se pudo guardar en Firebase. Vuelve a iniciar sesión como administrador.");
+    }
   }
 
   function setPresentation(colorPresentation: "single" | "multicolor") {
@@ -606,6 +612,7 @@ export function DashboardProducts() {
             >
               <Save size={13} /> Guardar producto
             </button>
+            {saveError && <p className="mt-3 text-[10px] text-red-700">{saveError}</p>}
           </div>
           <aside className="h-fit rounded-2xl bg-[#ead7dc] p-5">
             <p className="text-[9px] font-bold uppercase tracking-wider text-[#9e5f72]">
