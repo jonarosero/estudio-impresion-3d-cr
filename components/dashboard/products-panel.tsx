@@ -1,9 +1,11 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   ArrowLeft,
   Edit3,
+  Eye,
   ImagePlus,
   Plus,
   Save,
@@ -707,6 +709,15 @@ export function DashboardProducts() {
                 {product.weightGrams ?? 250} g
               </span>
               <div className="flex gap-1">
+                <Link
+                  href={`/producto/${product.slug}`}
+                  target="_blank"
+                  className="grid size-8 place-items-center rounded-full border border-[#e5d8dc] text-[#9e5f72]"
+                  aria-label={`Ver ${product.name} como cliente`}
+                  title="Ver como cliente"
+                >
+                  <Eye size={13} />
+                </Link>
                 <button
                   onClick={() => openEdit(product)}
                   className="grid size-8 place-items-center rounded-full border border-[#e5d8dc]"
