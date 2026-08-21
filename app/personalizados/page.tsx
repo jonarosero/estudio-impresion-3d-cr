@@ -1,8 +1,11 @@
 import { CustomQuoteForm } from "@/components/quotes/custom-quote-form";
+import { QuoteConversations } from "@/components/quotes/quote-conversations";
 
 export const metadata = { title: "Impresiones personalizadas" };
 
-export default function CustomPage() {
+export default async function CustomPage({ searchParams }: { searchParams: Promise<{ vista?: string }> }) {
+  const { vista } = await searchParams;
+  if (vista === "conversaciones") return <main className="page-shell py-10 sm:py-16"><QuoteConversations /></main>;
   return (
     <main className="page-shell py-10 sm:py-16">
       <div className="grid overflow-hidden rounded-[30px] bg-[#fffdfb] soft-shadow lg:grid-cols-[.8fr_1.2fr]">

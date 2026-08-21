@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Manrope } from "next/font/google";
 import "./globals.css";
 import { FirebaseAuthProvider } from "@/components/firebase/auth-provider";
 import { FirebaseCatalogProvider } from "@/components/firebase/catalog-provider";
+import { OnboardingGate } from "@/components/account/onboarding-gate";
 import { SiteChrome } from "@/components/ui/site-chrome";
 
 const display = Cormorant_Garamond({
@@ -28,7 +29,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="es" className={`${display.variable} ${sans.variable}`}>
       <body>
-        <FirebaseAuthProvider><FirebaseCatalogProvider><SiteChrome>{children}</SiteChrome></FirebaseCatalogProvider></FirebaseAuthProvider>
+        <FirebaseAuthProvider><FirebaseCatalogProvider><OnboardingGate><SiteChrome>{children}</SiteChrome></OnboardingGate></FirebaseCatalogProvider></FirebaseAuthProvider>
       </body>
     </html>
   );
