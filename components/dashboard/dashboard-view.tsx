@@ -231,6 +231,16 @@ function Overview({ onOpenProducts, orders }: { onOpenProducts: () => void; orde
   const quotes = useQuoteStore((state) => state.quotes);
   const sales = orders.filter((order) => order.paymentStatus === "paid").reduce((total, order) => total + order.total, 0);
   const activeOrders = orders.filter((order) => !["delivered", "cancelled"].includes(order.status));
+  const dailySales = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() - (6 - index));
+    const nextDate = new Date(date);
+    nextDate.setDate(nextDate.getDate() + 1);
+    const total = orders.filter((order) => order.paymentStatus === "paid" && new Date(order.createdAt) >= date && new Date(order.createdAt) < nextDate).reduce((sum, order) => sum + order.total, 0);
+    return { label: date.toLocaleDateString("es-EC", { weekday: "narrow" }), total };
+  });
+  const highestDailySale = Math.max(...dailySales.map((day) => day.total), 0);
   const stats = [
     {
       label: "Ventas del mes",
@@ -305,26 +315,27 @@ function Overview({ onOpenProducts, orders }: { onOpenProducts: () => void; orde
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold">Ventas</p>
-              <p className="mt-1 text-[9px] text-[#786970]">Ultimos 7 días</p>
+              <p className="mt-1 text-[9px] text-[#786970]">Cobros confirmados · últimos 7 días</p>
             </div>
             <BarChart3 size={17} className="text-[#9e5f72]" />
           </div>
-          <div className="mt-8 flex h-44 items-end gap-3">
-            {[42, 68, 48, 82, 63, 92, 74].map((height, index) => (
+          {highestDailySale > 0 ? <div className="mt-8 flex h-44 items-end gap-3">
+            {dailySales.map((day, index) => (
               <div
                 key={index}
                 className="flex flex-1 flex-col items-center gap-2"
               >
                 <div
                   className="w-full rounded-t-lg bg-[#d9abb7] transition hover:bg-[#9e5f72]"
-                  style={{ height: `${height}%` }}
+                  style={{ height: `${Math.max((day.total / highestDailySale) * 100, 4)}%` }}
+                  title={formatPrice(day.total)}
                 />
                 <span className="text-[8px] text-[#91848a]">
-                  {["L", "M", "M", "J", "V", "S", "D"][index]}
+                  {day.label}
                 </span>
               </div>
             ))}
-          </div>
+          </div> : <div className="mt-8 grid h-44 place-items-center rounded-xl border border-dashed border-[#e5d8dc] text-center text-[10px] text-[#786970]">Aún no hay cobros confirmados en los últimos 7 días.</div>}
         </div>
         <div className="rounded-2xl bg-[#fffdfb] p-5">
           <p className="text-xs font-bold">Actividad reciente</p>
