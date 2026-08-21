@@ -470,8 +470,11 @@ function QuotesPanel() {
     setReply("");
     setAttachments([]);
   }
-  const subtotal = (Number(unitPrice) || 0) * (selected?.quantity ?? 0);
-  const total = subtotal + (Number(shippingCost) || 0);
+  const unitPriceValue = Number(unitPrice);
+  const shippingCostValue = Number(shippingCost);
+  const pricesAreValid = Number.isFinite(unitPriceValue) && unitPriceValue > 0 && Number.isFinite(shippingCostValue) && shippingCostValue >= 0;
+  const subtotal = pricesAreValid ? unitPriceValue * (selected?.quantity ?? 0) : 0;
+  const total = pricesAreValid ? subtotal + shippingCostValue : 0;
   async function convertQuote() {
     if (!selected) return;
     setConverting(true); setConversionMessage("");
@@ -636,7 +639,7 @@ function QuotesPanel() {
                 >
                   Marcar cotizada
                 </button>
-                {selected.status !== "converted" && <div className="flex flex-wrap items-center gap-2 rounded-xl bg-[#e7eee3] p-2 text-[9px]"><input value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} type="number" min="0" step="0.01" placeholder="Precio/u." className="w-20 rounded-lg border border-[#c8d5c1] bg-white px-2 py-1.5" /><input value={shippingCost} onChange={(event) => setShippingCost(event.target.value)} type="number" min="0" step="0.01" placeholder="Envío" className="w-16 rounded-lg border border-[#c8d5c1] bg-white px-2 py-1.5" /><span>Subt. {formatPrice(subtotal)} · Total {formatPrice(total)}</span><button disabled={converting || !unitPrice || Number(unitPrice) <= 0} onClick={() => void convertQuote()} className="rounded-full bg-[#52704b] px-3 py-2 font-bold text-white disabled:opacity-50">{converting ? "Convirtiendo..." : "Convertir"}</button></div>}
+                {selected.status !== "converted" && <div className="flex flex-wrap items-center gap-2 rounded-xl bg-[#e7eee3] p-2 text-[9px]"><input value={unitPrice} onChange={(event) => setUnitPrice(event.target.value)} type="number" min="0.01" step="0.01" placeholder="Precio/u." className="w-20 rounded-lg border border-[#c8d5c1] bg-white px-2 py-1.5" /><input value={shippingCost} onChange={(event) => setShippingCost(event.target.value)} type="number" min="0" step="0.01" placeholder="Envío" className="w-16 rounded-lg border border-[#c8d5c1] bg-white px-2 py-1.5" /><span>{pricesAreValid ? `Subt. ${formatPrice(subtotal)} · Total ${formatPrice(total)}` : "Precio mayor a $0 y envío no negativo"}</span><button disabled={converting || !pricesAreValid} onClick={() => void convertQuote()} className="rounded-full bg-[#52704b] px-3 py-2 font-bold text-white disabled:opacity-50">{converting ? "Convirtiendo..." : "Convertir"}</button></div>}
                 <button
                   onClick={() => setStatus(selected.id, "discarded")}
                   className="rounded-full bg-[#f4e5e7] px-3 py-2 text-[8px] font-bold text-[#9e5f72]"
