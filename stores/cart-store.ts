@@ -20,8 +20,11 @@ type CartState = {
   clear: () => void;
   open: () => void;
   close: () => void;
-  startListening: (userId: string) => () => void;
+  startListening: (userId: string) => void;
+  stopListening: () => void;
 };
+
+let unsubscribe: (() => void) | undefined;
 
 export const useCartStore = create<CartState>()(
   persist(
@@ -63,13 +66,15 @@ export const useCartStore = create<CartState>()(
       open: () => set({ isOpen: true }),
       close: () => set({ isOpen: false }),
       startListening: (userId) => {
+        unsubscribe?.();
         const userRef = doc(getFirebaseDb(), "users", userId);
-        return onSnapshot(userRef, (snapshot) => {
+        unsubscribe = onSnapshot(userRef, (snapshot) => {
           const remoteLines = snapshot.data()?.cart as CartLine[] | undefined;
           if (remoteLines) set({ lines: remoteLines });
           else void setDoc(userRef, { cart: get().lines }, { merge: true });
         });
       },
+      stopListening: () => { unsubscribe?.(); unsubscribe = undefined; set({ lines: [] }); },
     }),
     {
       name: "cr-cart",

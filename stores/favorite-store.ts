@@ -7,8 +7,11 @@ import { getFirebaseAuth, getFirebaseDb } from "@/lib/firebase/client";
 type FavoriteState = {
   productIds: string[];
   toggle: (productId: string) => void;
-  startListening: (userId: string) => () => void;
+  startListening: (userId: string) => void;
+  stopListening: () => void;
 };
+
+let unsubscribe: (() => void) | undefined;
 
 export const useFavoriteStore = create<FavoriteState>()((set, get) => ({
   productIds: [],
@@ -21,7 +24,11 @@ export const useFavoriteStore = create<FavoriteState>()((set, get) => ({
     set({ productIds });
     void setDoc(doc(getFirebaseDb(), "users", user.uid), { favorites: productIds }, { merge: true });
   },
-  startListening: (userId) => onSnapshot(doc(getFirebaseDb(), "users", userId), (snapshot) => {
+  startListening: (userId) => {
+    unsubscribe?.();
+    unsubscribe = onSnapshot(doc(getFirebaseDb(), "users", userId), (snapshot) => {
     set({ productIds: snapshot.data()?.favorites ?? [] });
-  }),
+    });
+  },
+  stopListening: () => { unsubscribe?.(); unsubscribe = undefined; set({ productIds: [] }); },
 }));

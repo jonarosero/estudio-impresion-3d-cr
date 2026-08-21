@@ -73,3 +73,7 @@ a {
     width: min(100% - 20px, 1240px);
   }
 }
+/* AccountQuickLinks replaces the legacy static account summary cards. */
+.account-page > main > .mt-7.grid {
+  display: none;
+}

@@ -18,7 +18,9 @@ export function FirebaseAuthProvider({ children }: Readonly<{ children: React.Re
   const startOrderListening = useOrderStore((state) => state.startListening);
   const stopOrderListening = useOrderStore((state) => state.stopListening);
   const startCartListening = useCartStore((state) => state.startListening);
+  const stopCartListening = useCartStore((state) => state.stopListening);
   const startFavoriteListening = useFavoriteStore((state) => state.startListening);
+  const stopFavoriteListening = useFavoriteStore((state) => state.stopListening);
 
   useEffect(() => {
     if (!isFirebaseConfigured) return;
@@ -27,6 +29,8 @@ export function FirebaseAuthProvider({ children }: Readonly<{ children: React.Re
       if (!user) {
         stopQuoteListening();
         stopOrderListening();
+        stopCartListening();
+        stopFavoriteListening();
         setAccount(null);
         setLoading(false);
         return;
@@ -47,8 +51,8 @@ export function FirebaseAuthProvider({ children }: Readonly<{ children: React.Re
       const isAdmin = token.claims.admin === true;
       startQuoteListening(user.uid, isAdmin);
       startOrderListening(user.uid, isAdmin);
-      const stopCartListening = startCartListening(user.uid);
-      const stopFavoriteListening = startFavoriteListening(user.uid);
+      startCartListening(user.uid);
+      startFavoriteListening(user.uid);
       setAccount({
         id: user.uid,
         name: user.displayName ?? "Cliente J&J",
@@ -56,14 +60,15 @@ export function FirebaseAuthProvider({ children }: Readonly<{ children: React.Re
         role: isAdmin ? "admin" : "customer",
       });
       setLoading(false);
-      return () => { stopCartListening(); stopFavoriteListening(); };
     });
     return () => {
       unsubscribe();
       stopQuoteListening();
       stopOrderListening();
+      stopCartListening();
+      stopFavoriteListening();
     };
-  }, [setAccount, setLoading, startCartListening, startFavoriteListening, startOrderListening, startQuoteListening, stopOrderListening, stopQuoteListening]);
+  }, [setAccount, setLoading, startCartListening, startFavoriteListening, startOrderListening, startQuoteListening, stopCartListening, stopFavoriteListening, stopOrderListening, stopQuoteListening]);
 
   return children;
 }
