@@ -23,7 +23,8 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { PromotionsPanel } from "@/components/dashboard/promotions-panel";
 import { SettingsPanel } from "@/components/dashboard/settings-panel";
 import { DashboardProducts } from "@/components/dashboard/products-panel";
@@ -53,6 +54,9 @@ const nav: Array<{ id: Tab; label: string; icon: typeof Box }> = [
 ];
 
 export function DashboardView() {
+  const router = useRouter();
+  const account = useAccountStore((state) => state.account);
+  const isAccountLoading = useAccountStore((state) => state.isLoading);
   const [tab, setTab] = useState<Tab>("resumen");
   const [mobileNav, setMobileNav] = useState(false);
   const [search, setSearch] = useState("");
@@ -65,6 +69,15 @@ export function DashboardView() {
     setTab(next);
     setMobileNav(false);
   }
+
+  useEffect(() => {
+    if (isAccountLoading) return;
+    if (!account) router.replace("/login?redirect=/dashboard");
+    else if (account.role !== "admin") router.replace("/");
+  }, [account, isAccountLoading, router]);
+
+  if (isAccountLoading) return <main className="grid min-h-dvh place-items-center bg-[#f7f3f3] text-sm text-[#786970]">Verificando acceso...</main>;
+  if (!account || account.role !== "admin") return null;
 
   return (
     <main className="min-h-dvh w-full bg-[#f7f3f3]">

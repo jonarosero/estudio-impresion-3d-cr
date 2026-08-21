@@ -4,11 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ImagePlus, Info, MessageCircle, Ruler, Send, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { useQuoteStore } from "@/stores/quote-store";
 import { SelectMenu } from "@/components/ui/select-menu";
 import { useAccountStore } from "@/stores/account-store";
+import { doc, getDoc } from "firebase/firestore";
+import { getFirebaseDb } from "@/lib/firebase/client";
 
 const quoteSchema = z.object({
   name: z.string().min(2, "Escribe tu nombre"),
@@ -34,11 +37,19 @@ export function CustomQuoteForm() {
   const addQuote = useQuoteStore((state) => state.addQuote);
   const account = useAccountStore((state) => state.account);
   const isAccountLoading = useAccountStore((state) => state.isLoading);
-  const { register, handleSubmit, setValue, control, formState: { errors, isSubmitting } } = useForm<QuoteValues>({
+  const { register, handleSubmit, setValue, reset, control, formState: { errors, isSubmitting } } = useForm<QuoteValues>({
     resolver: zodResolver(quoteSchema),
     defaultValues: { quantity: 1, color: "Rosa pastel" },
   });
   const color = useWatch({ control, name: "color" });
+
+  useEffect(() => {
+    if (!account) return;
+    void getDoc(doc(getFirebaseDb(), "users", account.id)).then((snapshot) => {
+      const profile = snapshot.data();
+      reset({ name: account.name, phone: String(profile?.phone ?? ""), quantity: 1, color: "Rosa pastel", description: "", height: undefined, width: undefined, depth: undefined });
+    });
+  }, [account, reset]);
 
   function addImages(files: FileList | null) {
     if (!files) return;

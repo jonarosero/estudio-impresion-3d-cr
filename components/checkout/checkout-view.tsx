@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, LockKeyhole, Scale, ShieldCheck, Truck } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatPrice } from "@/lib/data";
 import { getShippingRule, SERVIENTREGA_QUOTE_URL } from "@/lib/shipping";
 import { useCartStore } from "@/stores/cart-store";
@@ -13,6 +14,7 @@ import { useOrderStore } from "@/stores/order-store";
 const inputClass = "w-full rounded-2xl border border-[#ded0d4] bg-[#fffdfb] px-4 py-3.5 text-sm";
 
 export function CheckoutView() {
+  const router = useRouter();
   const [city, setCity] = useState("");
   const [details, setDetails] = useState({ customer: "", email: "", phone: "", shippingAddress: "", reference: "" });
   const [error, setError] = useState("");
@@ -34,6 +36,7 @@ export function CheckoutView() {
       const orderId = await createOrder({ ...details, city, reference: details.reference }, lines);
       clearCart();
       setCreatedOrder(orderId);
+      router.push(`/checkout/exito?orderId=${encodeURIComponent(orderId)}`);
     } catch (submitError) { setError(submitError instanceof Error ? submitError.message : "No fue posible crear el pedido."); }
   }
 

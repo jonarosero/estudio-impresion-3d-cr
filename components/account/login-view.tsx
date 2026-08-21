@@ -6,7 +6,7 @@ import { useState } from "react";
 import { isFirebaseConfigured } from "@/lib/firebase/client";
 import { useAccountStore } from "@/stores/account-store";
 
-export function LoginView() {
+export function LoginView({ redirect }: { redirect?: string }) {
   const router = useRouter();
   const signIn = useAccountStore((state) => state.signIn);
   const [error, setError] = useState("");
@@ -17,7 +17,7 @@ export function LoginView() {
     setPending(true);
     try {
       await signIn();
-      router.push("/cuenta");
+      router.push(redirect?.startsWith("/") ? redirect : "/cuenta");
     } catch {
       setError("No fue posible iniciar sesion con Google. Intentalo nuevamente.");
     } finally {
