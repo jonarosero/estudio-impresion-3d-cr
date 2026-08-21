@@ -23,16 +23,8 @@ export const useAccountStore = create<AccountState>()((set) => ({
   users: [],
   setLoading: (isLoading) => set({ isLoading }),
   setAccount: (account) => set({ account, users: account ? [account] : [] }),
-  signIn: async () => {
-    const credential = await signInWithPopup(getFirebaseAuth(), new GoogleAuthProvider());
-    const idToken = await credential.user.getIdToken();
-    const response = await fetch("/api/auth/session", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ idToken }) });
-    if (!response.ok) throw new Error("No fue posible crear la sesión segura.");
-  },
-  signOut: async () => {
-    await fetch("/api/auth/session", { method: "DELETE" });
-    await firebaseSignOut(getFirebaseAuth());
-  },
+  signIn: () => signInWithPopup(getFirebaseAuth(), new GoogleAuthProvider()).then(() => undefined),
+  signOut: () => firebaseSignOut(getFirebaseAuth()),
   setRole: () => {
     throw new Error("Los roles se administran con Firebase Admin.");
   },
