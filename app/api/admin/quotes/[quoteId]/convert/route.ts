@@ -32,6 +32,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ quo
     });
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
+    const code = typeof error === "object" && error && "code" in error ? String(error.code) : "";
+    if (code.startsWith("auth/")) return NextResponse.json({ error: "Token de acceso inválido o vencido." }, { status: 401 });
     const message = error instanceof Error ? error.message : "UNKNOWN";
     const status = message === "NOT_FOUND" ? 404 : message === "ALREADY_CONVERTED" ? 409 : message === "INVALID_STATUS" || message === "INVALID_QUANTITY" ? 400 : 500;
     return NextResponse.json({ error: message === "ALREADY_CONVERTED" ? "Esta cotización ya fue convertida." : message === "NOT_FOUND" ? "No se encontró la cotización." : message === "INVALID_STATUS" ? "La cotización no puede convertirse." : "No fue posible convertir la cotización." }, { status });

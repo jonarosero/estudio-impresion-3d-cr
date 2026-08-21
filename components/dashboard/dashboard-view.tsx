@@ -241,6 +241,7 @@ function Overview({ onOpenProducts, orders }: { onOpenProducts: () => void; orde
     return { label: date.toLocaleDateString("es-EC", { weekday: "narrow" }), total };
   });
   const highestDailySale = Math.max(...dailySales.map((day) => day.total), 0);
+  const todayLabel = new Intl.DateTimeFormat("es-EC", { weekday: "long", day: "numeric", month: "long" }).format(new Date());
   const stats = [
     {
       label: "Ventas del mes",
@@ -275,7 +276,7 @@ function Overview({ onOpenProducts, orders }: { onOpenProducts: () => void; orde
     <>
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-xs text-[#786970]">Jueves, 20 de agosto</p>
+          <p className="text-xs capitalize text-[#786970]">{todayLabel}</p>
           <h2 className="mt-1 font-display text-4xl font-semibold">
              Buenos días, {account?.name.split(" ")[0] ?? "administración"}
           </h2>
