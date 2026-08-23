@@ -7,6 +7,7 @@ import {
   Edit3,
   Eye,
   ImagePlus,
+  LoaderCircle,
   Plus,
   Save,
   Search,
@@ -80,6 +81,7 @@ export function DashboardProducts() {
   const [search, setSearch] = useState("");
   const [saveError, setSaveError] = useState("");
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const normalizedSearch = search.trim().toLowerCase();
   const filteredProducts = products.filter((product) =>
     [product.name, product.slug, product.category].some((value) =>
@@ -117,13 +119,12 @@ export function DashboardProducts() {
       colors: variants.map((item) => item.name),
       colorPresentation: values.colorPresentation ?? "single",
       availableFinishes,
-      finishOptions:
-        values.finishOptions ??
-        availableFinishes.map((id) => ({
-          id,
-          ...finishDetails[id],
-          image: values.image,
-        })),
+      finishOptions: availableFinishes.map((id) => ({
+        id,
+        ...finishDetails[id],
+        image: values.image,
+        ...values.finishOptions?.find((option) => option.id === id),
+      })),
     });
     setFormOpen(true);
   }
@@ -144,11 +145,15 @@ export function DashboardProducts() {
     };
     try {
       setSaveError("");
+      setIsSaving(true);
       if (editingId) await update(editingId, product);
       else await add(product);
       setFormOpen(false);
-    } catch {
-      setSaveError("No se pudo guardar en Firebase. Vuelve a iniciar sesión como administrador.");
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : "Error desconocido.";
+      setSaveError(`No se pudo guardar en Firebase: ${reason}`);
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -638,11 +643,15 @@ export function DashboardProducts() {
             )}
             <button
               onClick={save}
-              disabled={isUploading}
-              className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#35282d] px-5 py-3 text-[10px] font-bold text-white"
+              disabled={isUploading || isSaving}
+              className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#35282d] px-5 py-3 text-[10px] font-bold text-white disabled:cursor-not-allowed disabled:opacity-70"
             >
-              <Save size={13} />
-              {isUploading ? "Subiendo imagen..." : "Guardar producto"}
+              {isSaving ? <LoaderCircle size={13} className="animate-spin" /> : <Save size={13} />}
+              {isSaving
+                ? "Guardando producto..."
+                : isUploading
+                  ? "Subiendo imagen..."
+                  : "Guardar producto"}
             </button>
             {saveError && <p className="mt-3 text-[10px] text-red-700">{saveError}</p>}
           </div>

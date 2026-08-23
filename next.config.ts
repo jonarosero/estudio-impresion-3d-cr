@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "mcp-tools-z-image-turbo.hf.space",
       },
+      {
+        protocol: "https",
+        hostname: "makerworld.bblmw.com",
+      },
     ],
   },
 };
