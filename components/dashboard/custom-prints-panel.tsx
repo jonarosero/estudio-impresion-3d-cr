@@ -41,7 +41,8 @@ export function CustomPrintsPanel() {
       setSaving(true);
       const imageRef = ref(getFirebaseStorage(), `custom-prints/${crypto.randomUUID()}/${crypto.randomUUID()}`);
       await uploadBytes(imageRef, file, { contentType: file.type });
-      setDraft((current) => ({ ...current, image: await getDownloadURL(imageRef) }));
+      const image = await getDownloadURL(imageRef);
+      setDraft((current) => ({ ...current, image }));
       setMessage("");
     } catch {
       setMessage("No se pudo subir la imagen. Confirma tus permisos de administrador.");
