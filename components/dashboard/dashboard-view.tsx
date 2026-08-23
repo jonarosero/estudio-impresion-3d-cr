@@ -573,7 +573,7 @@ function QuotesPanel() {
                   Enviar
                 </button>
               </div>
-              <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#d8c9cd] px-3 py-2 text-[9px] font-bold text-[#9e5f72]">Adjuntar imágenes<input type="file" accept="image/*" multiple className="sr-only" onChange={(event) => setAttachments(Array.from(event.target.files ?? []).filter((file) => file.size <= 8 * 1024 * 1024).slice(0, 4))} /></label>{attachments.length > 0 && <span className="ml-2 text-[9px] text-[#786970]">{attachments.length} imagen(es) listas para enviar</span>}
+               <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#d8c9cd] px-3 py-2 text-[9px] font-bold text-[#9e5f72]">Adjuntar imágenes<input type="file" accept="image/*" multiple className="sr-only" onChange={(event) => setAttachments(Array.from(event.target.files ?? []).filter((file) => file.size <= 10 * 1024 * 1024).slice(0, 4))} /></label>{attachments.length > 0 && <span className="ml-2 text-[9px] text-[#786970]">{attachments.length} imagen(es) listas para enviar</span>}
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
                   onClick={() => setStatus(selected.id, "quoted")}

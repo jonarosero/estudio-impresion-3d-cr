@@ -6,11 +6,12 @@ export type CategoryId =
   | "personalizadas";
 
 export type ProductFinish = "standard" | "hand-painted" | "ready-to-paint";
+export type ProductFilamentType = "matte" | "marble" | "metallic" | "wood";
 
 export type ProductColor = {
   name: string;
   hex?: string;
-  type: "matte" | "marble" | "metallic" | "wood" | "multicolor";
+  type: ProductFilamentType | "multicolor";
   price: number;
   image: string;
 };
@@ -36,6 +37,7 @@ export type Product = {
   colors: string[];
   colorVariants?: ProductColor[];
   colorPresentation?: "single" | "multicolor";
+  availableFilamentTypes?: ProductFilamentType[];
   availableFinishes?: ProductFinish[];
   finishOptions?: ProductFinishOption[];
   badge?: string;

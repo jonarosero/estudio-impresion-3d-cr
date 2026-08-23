@@ -21,6 +21,7 @@ import type {
   CategoryId,
   Product,
   ProductColor,
+  ProductFilamentType,
   ProductFinish,
   ProductFinishOption,
 } from "@/lib/types";
@@ -53,6 +54,12 @@ const colorPalette: Array<
   { family: "PLA madera", name: "Roble", hex: "#9a623e", type: "wood" },
   { family: "PLA madera", name: "Nogal", hex: "#573826", type: "wood" },
 ];
+const filamentOptions: Array<{ value: ProductFilamentType; label: string }> = [
+  { value: "matte", label: "PLA+ sólido" },
+  { value: "marble", label: "PLA mármol" },
+  { value: "metallic", label: "PLA metalizado" },
+  { value: "wood", label: "PLA madera" },
+];
 const emptyProduct: Omit<Product, "id"> = {
   slug: "",
   name: "",
@@ -66,6 +73,7 @@ const emptyProduct: Omit<Product, "id"> = {
     { name: "Rosa nube", hex: "#e6bdc8", type: "matte", price: 0, image: defaultImage },
   ],
   colorPresentation: "single",
+  availableFilamentTypes: ["matte"],
   availableFinishes: ["standard"],
   weightGrams: 100,
   featured: false,
@@ -133,6 +141,16 @@ export function DashboardProducts() {
     const availableFinishes: ProductFinish[] = values.availableFinishes?.length
       ? values.availableFinishes
       : ["standard"];
+    const availableFilamentTypes: ProductFilamentType[] =
+      values.availableFilamentTypes?.length
+        ? values.availableFilamentTypes
+        : Array.from(
+            new Set(
+              variants.map((item) =>
+                item.type === "multicolor" ? "matte" : item.type,
+              ),
+            ),
+          );
     setDraft({
       ...emptyProduct,
       ...values,
@@ -142,6 +160,9 @@ export function DashboardProducts() {
       })),
       colors: variants.map((item) => item.name),
       colorPresentation: values.colorPresentation ?? "single",
+      availableFilamentTypes: availableFilamentTypes.length
+        ? availableFilamentTypes
+        : ["matte"],
       availableFinishes,
       finishOptions: availableFinishes.map((id) => ({
         id,
@@ -296,8 +317,8 @@ export function DashboardProducts() {
     updateImage: (image: string) => void,
   ) {
     if (!file) return;
-    if (!file.type.startsWith("image/") || file.size >= 8 * 1024 * 1024) {
-      setSaveError("Selecciona una imagen de menos de 8 MB.");
+    if (!file.type.startsWith("image/") || file.size > 10 * 1024 * 1024) {
+      setSaveError("Selecciona una imagen de hasta 10 MB.");
       return;
     }
     if (!isFirebaseConfigured) {
@@ -473,9 +494,55 @@ export function DashboardProducts() {
                   El cliente podrá escoger una de estas versiones. No se
                   muestran acabados para esta modalidad.
                 </p>
+                <div className="mt-4 rounded-xl bg-[#faf6f6] p-3">
+                  <p className="text-[9px] font-bold text-[#786970]">
+                    Tipos de filamento disponibles
+                  </p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {filamentOptions.map((option) => {
+                      const selected = (
+                        draft.availableFilamentTypes ?? ["matte"]
+                      ).includes(option.value);
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() =>
+                            setDraft((current) => {
+                              const active: ProductFilamentType[] =
+                                current.availableFilamentTypes ?? ["matte"];
+                              const next = selected
+                                ? active.filter((type) => type !== option.value)
+                                : [...active, option.value];
+                              return {
+                                ...current,
+                                availableFilamentTypes: next.length
+                                  ? next
+                                  : active,
+                              };
+                            })
+                          }
+                          className={`rounded-full border px-3 py-2 text-[9px] font-bold ${selected ? "border-[#35282d] bg-[#f3e7e9] text-[#35282d]" : "border-[#d8c9cd] bg-white text-[#786970]"}`}
+                        >
+                          {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <div className="mt-4 space-y-3">
-                  {(draft.colorVariants ?? []).map((variant, index) => (
-                    <div
+                  {(draft.colorVariants ?? []).map((variant, index) => {
+                    const activeTypes: ProductFilamentType[] =
+                      draft.availableFilamentTypes ?? ["matte"];
+                    const variantType =
+                      variant.type === "multicolor" ? "matte" : variant.type;
+                    const paletteType = activeTypes.includes(variantType)
+                      ? variantType
+                      : activeTypes[0];
+                    const paletteColors = colorPalette.filter(
+                      (color) => color.type === paletteType,
+                    );
+                    return <div
                       key={index}
                       className="rounded-2xl border border-[#e5d8dc] p-4"
                     >
@@ -493,47 +560,65 @@ export function DashboardProducts() {
                         )}
                       </div>
                       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        <div>
-                          <p className="text-[9px] font-bold text-[#786970]">
-                            Color: {variant.name}
-                          </p>
-                          {Array.from(new Set(colorPalette.map((color) => color.family))).map((family) => (
-                            <div key={family} className="mt-2">
-                              <p className="text-[8px] font-bold uppercase tracking-wide text-[#91848a]">{family}</p>
-                              <div className="mt-1 flex flex-wrap gap-1.5">
-                                {colorPalette.filter((color) => color.family === family).map((color) => (
-                                  <button
-                                    key={color.name}
-                                    type="button"
-                                    onClick={() =>
-                                      updateVariant(index, {
-                                        name: color.name,
-                                        hex: color.hex,
-                                        type: color.type,
-                                      })
-                                    }
-                                    className={`size-6 rounded-full border-2 ${variant.hex === color.hex ? "border-[#35282d] ring-2 ring-[#e6bdc8]" : "border-white"}`}
-                                    style={{ background: color.hex }}
-                                    title={color.name}
-                                    aria-label={`Elegir ${color.name}`}
-                                  />
-                                ))}
-                              </div>
-                            </div>
+                        <label className="text-[9px] font-bold text-[#786970]">
+                          Tipo de filamento
+                          <SelectMenu
+                            value={paletteType}
+                            onChange={(type) => {
+                              const nextColor = colorPalette.find(
+                                (color) => color.type === type,
+                              );
+                              if (nextColor)
+                                updateVariant(index, {
+                                  name: nextColor.name,
+                                  hex: nextColor.hex,
+                                  type: nextColor.type,
+                                });
+                            }}
+                            options={filamentOptions.filter((option) =>
+                              activeTypes.includes(option.value),
+                            )}
+                            className="mt-2"
+                          />
+                        </label>
+                        <label className="text-[9px] font-bold text-[#786970]">
+                          Precio USD
+                          <input
+                            value={variant.price || ""}
+                            onChange={(event) =>
+                              updateVariant(index, {
+                                price: Number(event.target.value),
+                              })
+                            }
+                            type="number"
+                            step="0.01"
+                            className={inputClass}
+                          />
+                        </label>
+                      </div>
+                      <div className="mt-3">
+                        <p className="text-[9px] font-bold text-[#786970]">
+                          Color: {variant.name}
+                        </p>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {paletteColors.map((color) => (
+                            <button
+                              key={color.name}
+                              type="button"
+                              onClick={() =>
+                                updateVariant(index, {
+                                  name: color.name,
+                                  hex: color.hex,
+                                  type: color.type,
+                                })
+                              }
+                              className={`size-7 rounded-full border-2 ${variant.hex === color.hex ? "border-[#35282d] ring-2 ring-[#e6bdc8]" : "border-white"}`}
+                              style={{ background: color.hex }}
+                              title={color.name}
+                              aria-label={`Elegir ${color.name}`}
+                            />
                           ))}
                         </div>
-                        <input
-                          value={variant.price || ""}
-                          onChange={(event) =>
-                            updateVariant(index, {
-                              price: Number(event.target.value),
-                            })
-                          }
-                          type="number"
-                          step="0.01"
-                          placeholder="Precio USD"
-                          className={inputClass.replace("mt-2 ", "")}
-                        />
                       </div>
                       <label className="mt-3 block text-[10px] font-bold">
                         Imagen de la versión: URL o archivo
@@ -560,8 +645,8 @@ export function DashboardProducts() {
                           }
                         />
                       </label>
-                    </div>
-                  ))}
+                    </div>;
+                  })}
                 </div>
                 <button
                   onClick={addVariant}

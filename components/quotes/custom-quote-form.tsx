@@ -53,8 +53,8 @@ export function CustomQuoteForm() {
 
   function addImages(files: FileList | null) {
     if (!files) return;
-    const valid = Array.from(files).filter((file) => file.type.startsWith("image/") && file.size <= 8 * 1024 * 1024);
-    setImageError(valid.length !== files.length ? "Solo se aceptan imágenes de hasta 8 MB cada una." : "");
+    const valid = Array.from(files).filter((file) => file.type.startsWith("image/") && file.size <= 10 * 1024 * 1024);
+    setImageError(valid.length !== files.length ? "Solo se aceptan imágenes de hasta 10 MB cada una." : "");
     setImages((current) => {
       const next = valid.slice(0, Math.max(0, 4 - current.length)).map((file) => ({ file, url: URL.createObjectURL(file) }));
       return [...current, ...next];
@@ -106,7 +106,7 @@ export function CustomQuoteForm() {
         <label className="text-xs font-bold sm:col-span-2">Color<SelectMenu value={color} onChange={(color) => setValue("color", color, { shouldValidate: true })} options={["Rosa pastel", "Blanco", "Negro", "Verde salvia", "Por definir"].map((color) => ({ value: color, label: color }))} className="mt-2" /></label>
       </div>
       <div className="mt-7">
-        <div className="flex items-center justify-between"><span className="text-xs font-bold">Imágenes de referencia</span><span className="text-[10px] text-[#786970]">Máx. 4 imágenes · 8 MB</span></div>
+        <div className="flex items-center justify-between"><span className="text-xs font-bold">Imágenes de referencia</span><span className="text-[10px] text-[#786970]">Máx. 4 imágenes · 10 MB</span></div>
         {images.length < 4 && <label className="mt-2 flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-[#c9adb5] bg-[#faf6f6] px-5 py-8 text-center transition hover:bg-[#f3e7e9]"><ImagePlus size={24} className="text-[#9e5f72]" /><span className="mt-2 text-xs font-bold">Subir imágenes</span><span className="mt-1 text-[10px] text-[#786970]">JPG, PNG o WEBP</span><input type="file" accept="image/*" multiple className="sr-only" onChange={(event) => addImages(event.target.files)} /></label>}
         {images.length > 0 && <div className="mt-3 grid grid-cols-4 gap-2">{images.map((image, index) => <div key={image.url} className="group relative aspect-square overflow-hidden rounded-xl bg-[#f3e7e9]"><Image src={image.url} alt={`Referencia ${index + 1}`} fill unoptimized className="object-cover" /><button type="button" onClick={() => removeImage(index)} className="absolute right-1 top-1 grid size-7 place-items-center rounded-full bg-white/90 text-[#9e5f72]" aria-label="Quitar imagen"><Trash2 size={13} /></button></div>)}</div>}
         {imageError && <p className="mt-2 text-[10px] text-red-700">{imageError}</p>}
