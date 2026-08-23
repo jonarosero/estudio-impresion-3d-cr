@@ -1,4 +1,5 @@
 import { CustomQuoteForm } from "@/components/quotes/custom-quote-form";
+import { CustomPrintGallery } from "@/components/quotes/custom-print-gallery";
 import { QuoteConversations } from "@/components/quotes/quote-conversations";
 
 export const metadata = { title: "Impresiones personalizadas" };
@@ -8,7 +9,7 @@ export default async function CustomPage({ searchParams }: { searchParams: Promi
   if (vista === "conversaciones") return <main className="page-shell py-10 sm:py-16"><QuoteConversations /></main>;
   return (
     <main className="page-shell py-10 sm:py-16">
-      <div className="grid overflow-hidden rounded-[30px] bg-[#fffdfb] soft-shadow lg:grid-cols-[.8fr_1.2fr]">
+      <div id="solicitud" className="grid overflow-hidden rounded-[30px] bg-[#fffdfb] soft-shadow lg:grid-cols-[.8fr_1.2fr]">
         <div className="relative overflow-hidden bg-[#35282d] p-8 text-white sm:p-12 lg:p-14">
           <div className="absolute -right-24 -top-24 size-72 rounded-full border-[45px] border-[#c98698]/15" />
           <p className="eyebrow !text-[#eccbd3]">Tu idea, nuestra forma</p>
@@ -27,6 +28,7 @@ export default async function CustomPage({ searchParams }: { searchParams: Promi
         </div>
         <div className="p-6 sm:p-10 lg:p-14"><CustomQuoteForm /></div>
       </div>
+      <CustomPrintGallery />
     </main>
   );
 }
