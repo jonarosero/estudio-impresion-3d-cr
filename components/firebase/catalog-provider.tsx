@@ -11,10 +11,14 @@ import { useAccountStore } from "@/stores/account-store";
 export function FirebaseCatalogProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const account = useAccountStore((state) => state.account);
   const replaceProducts = useProductStore((state) => state.replace);
+  const setProductsLoaded = useProductStore((state) => state.setLoaded);
   const replacePromotions = usePromotionStore((state) => state.replace);
 
   useEffect(() => {
-    if (!isFirebaseConfigured) return;
+    if (!isFirebaseConfigured) {
+      setProductsLoaded();
+      return;
+    }
     const db = getFirebaseDb();
     const productsQuery = account?.role === "admin" ? collection(db, "products") : query(collection(db, "products"), where("status", "==", "active"));
     const promotionsQuery = account?.role === "admin" ? collection(db, "promotions") : query(collection(db, "promotions"), where("status", "==", "active"));
@@ -25,7 +29,7 @@ export function FirebaseCatalogProvider({ children }: Readonly<{ children: React
       replacePromotions(snapshot.docs.map((item) => item.data() as Promotion));
     });
     return () => { unsubscribeProducts(); unsubscribePromotions(); };
-  }, [account, replaceProducts, replacePromotions]);
+  }, [account, replaceProducts, replacePromotions, setProductsLoaded]);
 
   return children;
 }

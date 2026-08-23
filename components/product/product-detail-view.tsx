@@ -11,7 +11,11 @@ import { useProductStore } from "@/stores/product-store";
 
 export function ProductDetailView({ slug }: { slug: string }) {
   const products = useProductStore((state) => state.products);
+  const isCatalogLoaded = useProductStore((state) => state.isLoaded);
   const product = products.find((item) => item.slug === slug);
+  if (!product && !isCatalogLoaded) {
+    return <main className="grid min-h-[60vh] place-items-center text-sm text-[#786970]">Cargando producto...</main>;
+  }
   if (!product) notFound();
   const category = categories.find((item) => item.id === product.category)?.name;
   const related = products.filter((item) => item.category === product.category && item.id !== product.id).slice(0, 3);

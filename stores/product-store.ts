@@ -8,7 +8,9 @@ import type { Product } from "@/lib/types";
 
 type ProductState = {
   products: Product[];
+  isLoaded: boolean;
   replace: (products: Product[]) => void;
+  setLoaded: () => void;
   add: (product: Omit<Product, "id">) => Promise<void>;
   update: (id: string, product: Omit<Product, "id">) => Promise<void>;
   remove: (id: string) => Promise<void>;
@@ -16,7 +18,9 @@ type ProductState = {
 
 export const useProductStore = create<ProductState>()((set) => ({
   products: initialProducts,
-  replace: (products) => set({ products }),
+  isLoaded: false,
+  replace: (products) => set({ products, isLoaded: true }),
+  setLoaded: () => set({ isLoaded: true }),
   add: async (product) => {
     const id = crypto.randomUUID();
     await setDoc(doc(getFirebaseDb(), "products", id), { ...product, id, status: "active" });
