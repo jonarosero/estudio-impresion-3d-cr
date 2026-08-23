@@ -13,7 +13,9 @@ import {
   Trash2,
 } from "lucide-react";
 import { useState } from "react";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { categories, formatPrice } from "@/lib/data";
+import { getFirebaseStorage, isFirebaseConfigured } from "@/lib/firebase/client";
 import type {
   CategoryId,
   Product,
@@ -77,6 +79,7 @@ export function DashboardProducts() {
   const [draft, setDraft] = useState<Omit<Product, "id">>(emptyProduct);
   const [search, setSearch] = useState("");
   const [saveError, setSaveError] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
   const normalizedSearch = search.trim().toLowerCase();
   const filteredProducts = products.filter((product) =>
     [product.name, product.slug, product.category].some((value) =>
@@ -266,14 +269,35 @@ export function DashboardProducts() {
     });
   }
 
-  function uploadImage(
+  async function uploadImage(
     file: File | undefined,
     updateImage: (image: string) => void,
   ) {
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => updateImage(String(reader.result));
-    reader.readAsDataURL(file);
+    if (!file.type.startsWith("image/") || file.size >= 8 * 1024 * 1024) {
+      setSaveError("Selecciona una imagen de menos de 8 MB.");
+      return;
+    }
+    if (!isFirebaseConfigured) {
+      setSaveError("Firebase Storage no está configurado.");
+      return;
+    }
+    try {
+      setSaveError("");
+      setIsUploading(true);
+      const imageRef = ref(
+        getFirebaseStorage(),
+        `products/${crypto.randomUUID()}/${crypto.randomUUID()}`,
+      );
+      await uploadBytes(imageRef, file, { contentType: file.type });
+      updateImage(await getDownloadURL(imageRef));
+    } catch {
+      setSaveError(
+        "No se pudo subir la imagen. Confirma que tu sesión tenga permisos de administrador.",
+      );
+    } finally {
+      setIsUploading(false);
+    }
   }
 
   if (formOpen)
@@ -380,19 +404,23 @@ export function DashboardProducts() {
                   placeholder="Pega una URL de imagen"
                   className={inputClass}
                 />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(event) =>
-                    uploadImage(event.target.files?.[0], (image) =>
-                      setDraft((current) => ({ ...current, image })),
-                    )
-                  }
-                  className="sr-only"
-                />
-                <span className="mt-2 flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-[#c9adb5] bg-[#faf6f6] px-4 py-3 text-xs text-[#786970]">
-                  <ImagePlus size={15} /> O sube un archivo desde tu equipo
-                </span>
+                <label className="mt-2 flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-[#c9adb5] bg-[#faf6f6] px-4 py-3 text-xs text-[#786970]">
+                  <ImagePlus size={15} />
+                  {isUploading
+                    ? "Subiendo imagen..."
+                    : "O sube un archivo desde tu equipo"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={isUploading}
+                    onChange={(event) =>
+                      void uploadImage(event.target.files?.[0], (image) =>
+                        setDraft((current) => ({ ...current, image })),
+                      )
+                    }
+                    className="sr-only"
+                  />
+                </label>
               </label>
             </div>
             <section className="mt-7 border-t border-[#e5d8dc] pt-6">
@@ -483,7 +511,7 @@ export function DashboardProducts() {
                           accept="image/*"
                           className="sr-only"
                           onChange={(event) =>
-                            uploadImage(event.target.files?.[0], (image) =>
+                            void uploadImage(event.target.files?.[0], (image) =>
                               updateVariant(index, { image }),
                             )
                           }
@@ -593,7 +621,7 @@ export function DashboardProducts() {
                                 accept="image/*"
                                 className="sr-only"
                                 onChange={(event) =>
-                                  uploadImage(
+                                  void uploadImage(
                                     event.target.files?.[0],
                                     (image) => updateFinish(finish, { image }),
                                   )
@@ -610,9 +638,11 @@ export function DashboardProducts() {
             )}
             <button
               onClick={save}
+              disabled={isUploading}
               className="mt-7 inline-flex items-center gap-2 rounded-full bg-[#35282d] px-5 py-3 text-[10px] font-bold text-white"
             >
-              <Save size={13} /> Guardar producto
+              <Save size={13} />
+              {isUploading ? "Subiendo imagen..." : "Guardar producto"}
             </button>
             {saveError && <p className="mt-3 text-[10px] text-red-700">{saveError}</p>}
           </div>
@@ -726,13 +756,20 @@ export function DashboardProducts() {
                   <Edit3 size={13} />
                 </button>
                 <button
-                  onClick={() => {
+                  onClick={async () => {
                     if (
                       window.confirm(
                         `¿Eliminar ${product.name}? Esta accion no se puede deshacer.`,
                       )
                     )
-                      remove(product.id);
+                      try {
+                        setSaveError("");
+                        await remove(product.id);
+                      } catch {
+                        setSaveError(
+                          "No se pudo eliminar en Firebase. Vuelve a iniciar sesión como administrador.",
+                        );
+                      }
                   }}
                   className="grid size-8 place-items-center rounded-full border border-[#e5d8dc] text-[#9e5f72]"
                   aria-label={`Eliminar ${product.name}`}
