@@ -3,9 +3,10 @@
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect } from "react";
 import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
-import type { Product } from "@/lib/types";
+import type { CustomPrint, Product } from "@/lib/types";
 import { type Promotion, usePromotionStore } from "@/stores/promotion-store";
 import { useProductStore } from "@/stores/product-store";
+import { useCustomPrintStore } from "@/stores/custom-print-store";
 import { useAccountStore } from "@/stores/account-store";
 
 export function FirebaseCatalogProvider({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -13,6 +14,7 @@ export function FirebaseCatalogProvider({ children }: Readonly<{ children: React
   const replaceProducts = useProductStore((state) => state.replace);
   const setProductsLoaded = useProductStore((state) => state.setLoaded);
   const replacePromotions = usePromotionStore((state) => state.replace);
+  const replaceCustomPrints = useCustomPrintStore((state) => state.replace);
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
@@ -22,14 +24,18 @@ export function FirebaseCatalogProvider({ children }: Readonly<{ children: React
     const db = getFirebaseDb();
     const productsQuery = account?.role === "admin" ? collection(db, "products") : query(collection(db, "products"), where("status", "==", "active"));
     const promotionsQuery = account?.role === "admin" ? collection(db, "promotions") : query(collection(db, "promotions"), where("status", "==", "active"));
+    const printsQuery = account?.role === "admin" ? collection(db, "customPrints") : query(collection(db, "customPrints"), where("status", "==", "active"));
     const unsubscribeProducts = onSnapshot(productsQuery, (snapshot) => {
       replaceProducts(snapshot.docs.map((item) => item.data() as Product));
     });
     const unsubscribePromotions = onSnapshot(promotionsQuery, (snapshot) => {
       replacePromotions(snapshot.docs.map((item) => item.data() as Promotion));
     });
-    return () => { unsubscribeProducts(); unsubscribePromotions(); };
-  }, [account, replaceProducts, replacePromotions, setProductsLoaded]);
+    const unsubscribePrints = onSnapshot(printsQuery, (snapshot) => {
+      replaceCustomPrints(snapshot.docs.map((item) => item.data() as CustomPrint));
+    });
+    return () => { unsubscribeProducts(); unsubscribePromotions(); unsubscribePrints(); };
+  }, [account, replaceCustomPrints, replaceProducts, replacePromotions, setProductsLoaded]);
 
   return children;
 }

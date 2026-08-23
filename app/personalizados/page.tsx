@@ -1,5 +1,4 @@
 import { CustomQuoteForm } from "@/components/quotes/custom-quote-form";
-import { CustomPrintGallery } from "@/components/quotes/custom-print-gallery";
 import { QuoteConversations } from "@/components/quotes/quote-conversations";
 
 export const metadata = { title: "Impresiones personalizadas" };
@@ -28,7 +27,6 @@ export default async function CustomPage({ searchParams }: { searchParams: Promi
         </div>
         <div className="p-6 sm:p-10 lg:p-14"><CustomQuoteForm /></div>
       </div>
-      <CustomPrintGallery />
     </main>
   );
 }

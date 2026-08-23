@@ -14,7 +14,8 @@ const links = [
   { href: "/catalogo?categoria=hogar", label: "Hogar" },
   { href: "/catalogo?categoria=organizadores", label: "Organizadores" },
   { href: "/catalogo?categoria=figuritas", label: "Figuritas" },
-  { href: "/personalizados", label: "Personalizados" },
+  { href: "/personalizados/galeria", label: "Piezas creadas" },
+  { href: "/personalizados", label: "Pide tu pieza" },
   { href: "/#proceso", label: "Cómo lo hacemos" },
 ];
 

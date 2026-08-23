@@ -1,7 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useCustomPrintStore } from "@/stores/custom-print-store";
 
-const customPrints = [
+const fallbackPrints = [
   {
     title: "Impresión personalizada",
     description: "Pieza creada a partir de la idea y referencias de nuestro cliente.",
@@ -10,9 +13,11 @@ const customPrints = [
   },
 ];
 
-export function CustomPrintGallery() {
+export function CustomPrintGallery({ standalone = false }: { standalone?: boolean }) {
+  const prints = useCustomPrintStore((state) => state.prints);
+  const customPrints = prints.length ? prints : fallbackPrints;
   return (
-    <section id="trabajos" className="mt-20 border-t border-[#e5d8dc] pt-16 sm:mt-28 sm:pt-20">
+    <section id="trabajos" className={standalone ? "" : "mt-20 border-t border-[#e5d8dc] pt-16 sm:mt-28 sm:pt-20"}>
       <p className="eyebrow">Hecho para ideas reales</p>
       <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -24,9 +29,6 @@ export function CustomPrintGallery() {
             idea a pieza.
           </p>
         </div>
-        <span className="rounded-full bg-[#f3e7e9] px-4 py-2 text-[10px] font-bold text-[#9e5f72]">
-          Galería en crecimiento
-        </span>
       </div>
       <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {customPrints.map((print) => (
@@ -61,7 +63,7 @@ export function CustomPrintGallery() {
           </p>
         </div>
         <Link
-          href="#solicitud"
+          href="/personalizados"
           className="inline-flex justify-center rounded-full bg-[#eccbd3] px-6 py-3.5 text-sm font-bold text-[#35282d]"
         >
           Crear mi pedido

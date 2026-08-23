@@ -8,6 +8,14 @@ export type CategoryId =
 export type ProductFinish = "standard" | "hand-painted" | "ready-to-paint";
 export type ProductFilamentType = "matte" | "marble" | "metallic" | "wood";
 
+export type CustomPrint = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  status: "active" | "inactive";
+};
+
 export type ProductColor = {
   name: string;
   hex?: string;

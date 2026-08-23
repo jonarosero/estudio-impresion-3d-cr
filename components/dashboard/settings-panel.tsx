@@ -4,6 +4,7 @@ import { AdminUsersPanel } from "@/components/dashboard/admin-users-panel";
 import { IntegrationCard } from "@/components/dashboard/integration-card";
 import { MediaSettings } from "@/components/dashboard/media-settings";
 import { PanelHeading } from "@/components/dashboard/panel-heading";
+import { CustomPrintsPanel } from "@/components/dashboard/custom-prints-panel";
 
 const integrations = [
   {
@@ -41,6 +42,7 @@ export function SettingsPanel() {
         ))}
       </div>
       <MediaSettings />
+      <CustomPrintsPanel />
       <AdminUsersPanel />
     </>
   );

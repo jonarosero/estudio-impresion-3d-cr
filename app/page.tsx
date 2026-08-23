@@ -113,7 +113,7 @@ export default function Home() {
             <p className="eyebrow">Hecho a tu medida</p>
             <h2 className="mt-4 font-display text-5xl font-semibold leading-[0.92] sm:text-6xl">Tu idea también puede tomar forma.</h2>
             <p className="mt-6 max-w-md text-sm leading-7 text-[#66575d]">Desde letreros y recuerdos hasta organizadores hechos para un espacio exacto. Estas son algunas de las piezas personalizadas que hemos creado.</p>
-            <Link href="/personalizados" className="mt-8 inline-flex w-fit items-center gap-2 rounded-full bg-[#35282d] px-6 py-3.5 text-sm font-bold text-white">Crear una pieza personalizada <ArrowRight size={15} /></Link>
+            <div className="mt-8 flex flex-wrap gap-3"><Link href="/personalizados" className="inline-flex w-fit items-center gap-2 rounded-full bg-[#35282d] px-6 py-3.5 text-sm font-bold text-white">Pedir mi pieza <ArrowRight size={15} /></Link><Link href="/personalizados/galeria" className="inline-flex w-fit items-center gap-2 rounded-full border border-[#cdbbc0] px-6 py-3.5 text-sm font-bold text-[#35282d]">Ver piezas creadas</Link></div>
             <p className="mt-5 text-[10px] leading-5 text-[#786970]">Envía referencias, medidas y color. Te responderemos dentro de una conversación privada.</p>
           </div>
           <div className="grid grid-cols-2 gap-3 p-4 sm:gap-5 sm:p-7">
