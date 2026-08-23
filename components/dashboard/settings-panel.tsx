@@ -2,9 +2,7 @@
 
 import { AdminUsersPanel } from "@/components/dashboard/admin-users-panel";
 import { IntegrationCard } from "@/components/dashboard/integration-card";
-import { MediaSettings } from "@/components/dashboard/media-settings";
 import { PanelHeading } from "@/components/dashboard/panel-heading";
-import { CustomPrintsPanel } from "@/components/dashboard/custom-prints-panel";
 
 const integrations = [
   {
@@ -34,15 +32,13 @@ export function SettingsPanel() {
     <>
       <PanelHeading
         title="Configuración"
-        subtitle="Conexiones, medios y datos de la tienda"
+        subtitle="Conexiones y acceso administrativo"
       />
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         {integrations.map((integration) => (
           <IntegrationCard key={integration.title} {...integration} />
         ))}
       </div>
-      <MediaSettings />
-      <CustomPrintsPanel />
       <AdminUsersPanel />
     </>
   );

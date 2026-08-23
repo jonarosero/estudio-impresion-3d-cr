@@ -10,6 +10,7 @@ import {
   CircleDollarSign,
   ClipboardList,
   ExternalLink,
+  Images,
   LayoutDashboard,
   Menu,
   MessageCircleMore,
@@ -31,6 +32,8 @@ import { SettingsPanel } from "@/components/dashboard/settings-panel";
 import { DashboardProducts } from "@/components/dashboard/products-panel";
 import { OrdersPanel } from "@/components/dashboard/orders-panel";
 import { PanelHeading, StatusBadge } from "@/components/dashboard/panel-heading";
+import { CustomPrintsPanel } from "@/components/dashboard/custom-prints-panel";
+import { MediaSettings } from "@/components/dashboard/media-settings";
 import { formatPrice } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { useQuoteStore, type QuoteStatus } from "@/stores/quote-store";
@@ -46,6 +49,8 @@ type Tab =
   | "pedidos"
   | "cotizaciones"
   | "clientes"
+  | "contenido"
+  | "galeria"
   | "configuración";
 
 const nav: Array<{ id: Tab; label: string; icon: typeof Box }> = [
@@ -55,6 +60,8 @@ const nav: Array<{ id: Tab; label: string; icon: typeof Box }> = [
   { id: "pedidos", label: "Pedidos", icon: ShoppingBag },
   { id: "cotizaciones", label: "Cotizaciones", icon: MessageCircleMore },
   { id: "clientes", label: "Clientes", icon: Users },
+  { id: "contenido", label: "Contenido", icon: Images },
+  { id: "galeria", label: "Galería", icon: Images },
   { id: "configuración", label: "Configuración", icon: Settings },
 ];
 
@@ -220,12 +227,18 @@ export function DashboardView() {
             {tab === "pedidos" && <OrdersPanel />}
             {tab === "cotizaciones" && <QuotesPanel />}
             {tab === "clientes" && <CustomersPanel />}
+            {tab === "contenido" && <ContentPanel />}
+            {tab === "galeria" && <CustomPrintsPanel />}
             {tab === "configuración" && <SettingsPanel />}
           </div>
         </section>
       </div>
     </main>
   );
+}
+
+function ContentPanel() {
+  return <><PanelHeading title="Contenido" subtitle="Banners y videos mostrados en la tienda" /><MediaSettings /></>;
 }
 
 function Overview({ onOpenProducts, orders }: { onOpenProducts: () => void; orders: ReturnType<typeof useOrderStore.getState>["orders"] }) {
