@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import type { Product, ProductColor } from "@/lib/types";
 
 type VariantContextValue = {
@@ -24,7 +24,6 @@ export function ProductVariantProvider({ product, children }: { product: Product
   const variants = getVariants(product);
   const [variant, setVariantState] = useState(variants[0]);
   const [image, setImage] = useState(product.image);
-  useEffect(() => setImage(product.image), [product.image]);
   function setVariant(nextVariant: ProductColor) {
     setVariantState(nextVariant);
     setImage(nextVariant.image);
