@@ -3,7 +3,7 @@
 import { create } from "zustand";
 import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { products as initialProducts } from "@/lib/data";
-import { getFirebaseDb } from "@/lib/firebase/client";
+import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
 import type { Product } from "@/lib/types";
 
 type ProductState = {
@@ -17,8 +17,8 @@ type ProductState = {
 };
 
 export const useProductStore = create<ProductState>()((set) => ({
-  products: initialProducts,
-  isLoaded: false,
+  products: isFirebaseConfigured ? [] : initialProducts,
+  isLoaded: !isFirebaseConfigured,
   replace: (products) => set({ products, isLoaded: true }),
   setLoaded: () => set({ isLoaded: true }),
   add: async (product) => {

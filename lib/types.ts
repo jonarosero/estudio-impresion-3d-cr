@@ -9,7 +9,8 @@ export type ProductFinish = "standard" | "hand-painted" | "ready-to-paint";
 
 export type ProductColor = {
   name: string;
-  type: "matte" | "marble" | "multicolor";
+  hex?: string;
+  type: "matte" | "marble" | "metallic" | "wood" | "multicolor";
   price: number;
   image: string;
 };

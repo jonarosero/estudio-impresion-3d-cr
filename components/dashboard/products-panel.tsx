@@ -29,6 +29,30 @@ import { SelectMenu } from "@/components/ui/select-menu";
 
 const defaultImage =
   "https://images.unsplash.com/photo-1618220179428-22790b461013?auto=format&fit=crop&w=1200&q=85";
+const colorPalette: Array<
+  Pick<ProductColor, "name" | "hex" | "type"> & { family: string }
+> = [
+  { family: "PLA+ sólido", name: "Negro", hex: "#171717", type: "matte" },
+  { family: "PLA+ sólido", name: "Gris", hex: "#8a8d90", type: "matte" },
+  { family: "PLA+ sólido", name: "Blanco", hex: "#f5f5f0", type: "matte" },
+  { family: "PLA+ sólido", name: "Rojo", hex: "#c92d2d", type: "matte" },
+  { family: "PLA+ sólido", name: "Naranja", hex: "#e87924", type: "matte" },
+  { family: "PLA+ sólido", name: "Amarillo", hex: "#f2c230", type: "matte" },
+  { family: "PLA+ sólido", name: "Verde", hex: "#3e8c4a", type: "matte" },
+  { family: "PLA+ sólido", name: "Verde oliva", hex: "#747a35", type: "matte" },
+  { family: "PLA+ sólido", name: "Azul", hex: "#2463a6", type: "matte" },
+  { family: "PLA+ sólido", name: "Rosado", hex: "#e581a7", type: "matte" },
+  { family: "PLA mármol", name: "Mármol blanco", hex: "#d9d8d2", type: "marble" },
+  { family: "PLA mármol", name: "Mármol gris", hex: "#8a8d8e", type: "marble" },
+  { family: "PLA mármol", name: "Mármol negro", hex: "#343434", type: "marble" },
+  { family: "PLA metalizado", name: "Plata", hex: "#aeb3b7", type: "metallic" },
+  { family: "PLA metalizado", name: "Oro", hex: "#c8a34b", type: "metallic" },
+  { family: "PLA metalizado", name: "Cobre", hex: "#b66a48", type: "metallic" },
+  { family: "PLA metalizado", name: "Bronce", hex: "#8a643d", type: "metallic" },
+  { family: "PLA madera", name: "Pino", hex: "#c89e6c", type: "wood" },
+  { family: "PLA madera", name: "Roble", hex: "#9a623e", type: "wood" },
+  { family: "PLA madera", name: "Nogal", hex: "#573826", type: "wood" },
+];
 const emptyProduct: Omit<Product, "id"> = {
   slug: "",
   name: "",
@@ -39,7 +63,7 @@ const emptyProduct: Omit<Product, "id"> = {
   image: defaultImage,
   colors: ["Rosa nube"],
   colorVariants: [
-    { name: "Rosa nube", type: "matte", price: 0, image: defaultImage },
+    { name: "Rosa nube", hex: "#e6bdc8", type: "matte", price: 0, image: defaultImage },
   ],
   colorPresentation: "single",
   availableFinishes: ["standard"],
@@ -165,15 +189,7 @@ export function DashboardProducts() {
         colorPresentation === "multicolor"
           ? ["standard"]
           : current.availableFinishes,
-      colorVariants: (current.colorVariants ?? []).map((item) => ({
-        ...item,
-        type:
-          colorPresentation === "multicolor"
-            ? "multicolor"
-            : item.type === "multicolor"
-              ? "matte"
-              : item.type,
-      })),
+      colorVariants: current.colorVariants,
     }));
   }
 
@@ -196,7 +212,8 @@ export function DashboardProducts() {
       const colorVariants = [
         ...(current.colorVariants ?? []),
         {
-          name: "Nuevo color",
+          name: "Gris",
+          hex: "#9ca3af",
           type:
             current.colorPresentation === "multicolor"
               ? ("multicolor" as const)
@@ -376,7 +393,7 @@ export function DashboardProducts() {
               <label className={labelClass}>
                 Peso empacado (gramos)
                 <input
-                  value={draft.weightGrams}
+                  value={draft.weightGrams || ""}
                   onChange={(event) =>
                     setDraft({
                       ...draft,
@@ -476,14 +493,35 @@ export function DashboardProducts() {
                         )}
                       </div>
                       <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                        <input
-                          value={variant.name}
-                          onChange={(event) =>
-                            updateVariant(index, { name: event.target.value })
-                          }
-                          placeholder="Nombre de la versión"
-                          className={inputClass.replace("mt-2 ", "")}
-                        />
+                        <div>
+                          <p className="text-[9px] font-bold text-[#786970]">
+                            Color: {variant.name}
+                          </p>
+                          {Array.from(new Set(colorPalette.map((color) => color.family))).map((family) => (
+                            <div key={family} className="mt-2">
+                              <p className="text-[8px] font-bold uppercase tracking-wide text-[#91848a]">{family}</p>
+                              <div className="mt-1 flex flex-wrap gap-1.5">
+                                {colorPalette.filter((color) => color.family === family).map((color) => (
+                                  <button
+                                    key={color.name}
+                                    type="button"
+                                    onClick={() =>
+                                      updateVariant(index, {
+                                        name: color.name,
+                                        hex: color.hex,
+                                        type: color.type,
+                                      })
+                                    }
+                                    className={`size-6 rounded-full border-2 ${variant.hex === color.hex ? "border-[#35282d] ring-2 ring-[#e6bdc8]" : "border-white"}`}
+                                    style={{ background: color.hex }}
+                                    title={color.name}
+                                    aria-label={`Elegir ${color.name}`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                         <input
                           value={variant.price || ""}
                           onChange={(event) =>
@@ -589,8 +627,9 @@ export function DashboardProducts() {
                               )}
                               <input
                                 value={
-                                  option?.priceAdjustment ??
-                                  finishDetails[finish].priceAdjustment
+                                  (option?.priceAdjustment ??
+                                    finishDetails[finish].priceAdjustment) ||
+                                  ""
                                 }
                                 disabled={finish === "ready-to-paint"}
                                 onChange={(event) =>
