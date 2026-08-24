@@ -111,7 +111,7 @@ export default function Home() {
         <div className="grid overflow-hidden rounded-[30px] border border-[#e5d8dc] bg-white lg:grid-cols-[.85fr_1.15fr]">
           <div className="flex flex-col justify-center p-8 sm:p-12 lg:p-16">
             <p className="eyebrow">Hecho a tu medida</p>
-            <h2 className="mt-4 font-display text-5xl font-semibold leading-[0.92] sm:text-6xl">Tu idea también puede tomar forma.</h2>
+            <h2 className="mt-4 font-display text-5xl font-semibold leading-[1.05] sm:text-6xl">Tu idea también puede tomar forma.</h2>
             <p className="mt-6 max-w-md text-sm leading-7 text-[#66575d]">Desde letreros y recuerdos hasta organizadores hechos para un espacio exacto. Estas son algunas de las piezas personalizadas que hemos creado.</p>
             <div className="mt-8 flex flex-wrap gap-3"><Link href="/personalizados" className="inline-flex w-fit items-center gap-2 rounded-full bg-[#35282d] px-6 py-3.5 text-sm font-bold text-white">Pedir mi pieza <ArrowRight size={15} /></Link><Link href="/personalizados/galeria" className="inline-flex w-fit items-center gap-2 rounded-full border border-[#cdbbc0] px-6 py-3.5 text-sm font-bold text-[#35282d]">Ver piezas creadas</Link></div>
             <p className="mt-5 text-[10px] leading-5 text-[#786970]">Envía referencias, medidas y color. Te responderemos dentro de una conversación privada.</p>
