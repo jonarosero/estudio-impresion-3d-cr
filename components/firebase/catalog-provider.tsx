@@ -1,6 +1,6 @@
 "use client";
 
-import { collection, onSnapshot, query, where } from "firebase/firestore";
+import { collection, doc, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect } from "react";
 import { getFirebaseDb, isFirebaseConfigured } from "@/lib/firebase/client";
 import type { CustomPrint, Product } from "@/lib/types";
@@ -8,6 +8,7 @@ import { type Promotion, usePromotionStore } from "@/stores/promotion-store";
 import { useProductStore } from "@/stores/product-store";
 import { useCustomPrintStore } from "@/stores/custom-print-store";
 import { useAccountStore } from "@/stores/account-store";
+import { useSiteMediaStore, type MediaItem } from "@/stores/site-media-store";
 
 export function FirebaseCatalogProvider({ children }: Readonly<{ children: React.ReactNode }>) {
   const account = useAccountStore((state) => state.account);
@@ -15,6 +16,7 @@ export function FirebaseCatalogProvider({ children }: Readonly<{ children: React
   const setProductsLoaded = useProductStore((state) => state.setLoaded);
   const replacePromotions = usePromotionStore((state) => state.replace);
   const replaceCustomPrints = useCustomPrintStore((state) => state.replace);
+  const replaceSiteMedia = useSiteMediaStore((state) => state.replace);
 
   useEffect(() => {
     if (!isFirebaseConfigured) {
@@ -34,8 +36,13 @@ export function FirebaseCatalogProvider({ children }: Readonly<{ children: React
     const unsubscribePrints = onSnapshot(printsQuery, (snapshot) => {
       replaceCustomPrints(snapshot.docs.map((item) => item.data() as CustomPrint).sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")));
     });
-    return () => { unsubscribeProducts(); unsubscribePromotions(); unsubscribePrints(); };
-  }, [account, replaceCustomPrints, replaceProducts, replacePromotions, setProductsLoaded]);
+    const unsubscribeMedia = onSnapshot(doc(db, "siteMedia", "home"), (snapshot) => {
+      if (!snapshot.exists()) return;
+      const data = snapshot.data();
+      replaceSiteMedia({ tiktokVideos: (data.tiktokVideos as MediaItem[] | undefined) ?? [], bannerMessages: (data.bannerMessages as MediaItem[] | undefined) ?? [] });
+    });
+    return () => { unsubscribeProducts(); unsubscribePromotions(); unsubscribePrints(); unsubscribeMedia(); };
+  }, [account, replaceCustomPrints, replaceProducts, replacePromotions, replaceSiteMedia, setProductsLoaded]);
 
   return children;
 }

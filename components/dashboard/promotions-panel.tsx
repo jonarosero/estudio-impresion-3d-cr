@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Percent, Plus, Search } from "lucide-react";
+import { Percent, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { usePromotionStore } from "@/stores/promotion-store";
@@ -9,6 +9,7 @@ import { usePromotionStore } from "@/stores/promotion-store";
 export function PromotionsPanel() {
   const promotions = usePromotionStore((state) => state.promotions);
   const toggle = usePromotionStore((state) => state.toggle);
+  const remove = usePromotionStore((state) => state.remove);
   const [search, setSearch] = useState("");
   const normalizedSearch = search.trim().toLowerCase();
   const filteredPromotions = promotions.filter((promo) =>
@@ -93,6 +94,7 @@ export function PromotionsPanel() {
                 >
                   {promo.active ? "Pausar en banner" : "Activar en banner"}
                 </button>
+                <button onClick={() => { if (window.confirm(`¿Eliminar la promoción ${promo.title}? Esta acción no se puede deshacer.`)) void remove(promo.id); }} className="mt-2 flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-[9px] font-bold text-[#9e5f72] hover:bg-[#f4e5e7]"><Trash2 size={12} /> Eliminar promoción</button>
               </div>
             </div>
           ))

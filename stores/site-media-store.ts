@@ -1,7 +1,9 @@
 "use client";
 
 import { create } from "zustand";
+import { doc, setDoc } from "firebase/firestore";
 import { persist } from "zustand/middleware";
+import { getFirebaseDb } from "@/lib/firebase/client";
 
 export type MediaItem = { id: string; title: string; image: string; href: string };
 
@@ -12,6 +14,8 @@ type SiteMediaState = {
   updateBannerMessage: (id: string, patch: Partial<MediaItem>) => void;
   addBannerMessage: () => void;
   removeBannerMessage: (id: string) => void;
+  replace: (media: Pick<SiteMediaState, "tiktokVideos" | "bannerMessages">) => void;
+  save: () => Promise<void>;
 };
 
 const tiktokVideos: MediaItem[] = [
@@ -36,4 +40,9 @@ export const useSiteMediaStore = create<SiteMediaState>()(persist((set) => ({
   updateBannerMessage: (id, patch) => set((state) => ({ bannerMessages: update(state.bannerMessages, id, patch) })),
   addBannerMessage: () => set((state) => ({ bannerMessages: [...state.bannerMessages, { id: crypto.randomUUID(), title: "Nuevo mensaje", image: "", href: "/catalogo" }] })),
   removeBannerMessage: (id) => set((state) => ({ bannerMessages: state.bannerMessages.filter((item) => item.id !== id) })),
+  replace: (media) => set(media),
+  save: async () => {
+    const { tiktokVideos, bannerMessages } = useSiteMediaStore.getState();
+    await setDoc(doc(getFirebaseDb(), "siteMedia", "home"), { tiktokVideos, bannerMessages }, { merge: true });
+  },
 }), { name: "jj-site-media" }));
