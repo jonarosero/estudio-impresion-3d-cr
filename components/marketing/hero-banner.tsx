@@ -55,13 +55,13 @@ export function HeroBanner() {
   useEffect(() => {
     const timer = window.setInterval(
       () => setSlideIndex((current) => (current + 1) % slides.length),
-      5500,
+      8500,
     );
     return () => window.clearInterval(timer);
   }, [slides.length]);
 
   return (
-    <div className="relative isolate flex min-h-[540px] overflow-hidden bg-[#35282d] text-white lg:min-h-full">
+    <div className="relative isolate flex min-h-[540px] overflow-hidden bg-[#35282d] text-white lg:h-[680px] lg:min-h-0">
       {slides.map(
         (item, index) =>
           item.image && (
@@ -72,7 +72,7 @@ export function HeroBanner() {
               fill
               priority={index === 0}
               sizes="(max-width: 1024px) 100vw, 55vw"
-              className={`-z-20 object-cover transition-opacity duration-1000 ease-in-out ${index === slideIndex ? "opacity-100" : "opacity-0"}`}
+              className={`-z-20 object-cover object-center transition-opacity duration-1000 ease-in-out ${index === slideIndex ? "opacity-100" : "opacity-0"}`}
             />
           ),
       )}
@@ -105,12 +105,7 @@ export function HeroBanner() {
               <span className="grid size-10 place-items-center rounded-full bg-[#f3e7e9] text-[#9e5f72]">
                 <PackageCheck size={17} />
               </span>
-              <div>
-                <p className="text-[10px] font-bold">{slide.cta}</p>
-                <p className="mt-0.5 text-[9px] text-[#786970]">
-                  Actualizamos esta información desde el panel.
-                </p>
-              </div>
+              <p className="text-[10px] font-bold">{slide.cta}</p>
             </div>
             <Link
               href={slide.href}
