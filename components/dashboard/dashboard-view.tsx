@@ -438,7 +438,7 @@ function QuotesPanel() {
       const response = await fetch(`/api/admin/quotes/${selected.id}/convert`, { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${token ?? ""}` }, body: JSON.stringify({ unitPrice: Number(unitPrice), shippingCost: Number(shippingCost) }) });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error ?? "No fue posible convertir la cotización.");
-      setConversionMessage(`Pedido ${result.orderId} creado correctamente.`);
+      setConversionMessage(`Pedido ${result.code ?? result.orderId} creado correctamente.`);
     } catch (error) { setConversionMessage(error instanceof Error ? error.message : "No fue posible convertir la cotización."); }
     finally { setConverting(false); }
   }
@@ -486,8 +486,8 @@ function QuotesPanel() {
                   <MessageCircleMore size={15} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-xs font-bold">
-                    {quote.customer}
+                   <span className="block text-xs font-bold">
+                     {quote.code ?? quote.id} · {quote.customer}
                   </span>
                   <span className="mt-1 block truncate text-[9px] text-[#786970]">
                     {quote.description}
@@ -509,7 +509,7 @@ function QuotesPanel() {
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#eee5e7] p-5">
               <div>
                 <p className="text-sm font-bold">
-                  {selected.customer} · {selected.id}
+                   {selected.customer} · {selected.code ?? selected.id}
                 </p>
                 <p className="mt-1 text-[9px] text-[#786970]">
                   {selected.dimensions} · {selected.quantity} unidad(es) ·{" "}
@@ -602,12 +602,7 @@ function QuotesPanel() {
                   Descartar y borrar imágenes
                 </button>
                 {selected.status === "converted" && (
-                  <button
-                    onClick={() => setStatus(selected.id, "completed")}
-                    className="rounded-full bg-[#35282d] px-3 py-2 text-[8px] font-bold text-white"
-                  >
-                    Terminar venta y borrar imágenes
-                  </button>
+                  <><Link href={selected.orderId ? `/dashboard/pedidos/${selected.orderId}` : "/dashboard"} className="rounded-full border border-[#52704b] px-3 py-2 text-[8px] font-bold text-[#52704b]">Ver pedido {selected.orderCode ?? ""}</Link><button onClick={() => setStatus(selected.id, "completed")} className="rounded-full bg-[#35282d] px-3 py-2 text-[8px] font-bold text-white">Terminar venta y borrar imágenes</button></>
                 )}
               </div>
               {conversionMessage && <p className="mt-2 text-[9px] font-bold text-[#52704b]">{conversionMessage}</p>}

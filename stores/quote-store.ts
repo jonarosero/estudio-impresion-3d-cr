@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { collection, doc, onSnapshot, orderBy, query, setDoc, updateDoc, where, writeBatch } from "firebase/firestore";
+import { collection, doc, onSnapshot, orderBy, query, setDoc, updateDoc, where } from "firebase/firestore";
 import { deleteObject, getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { getFirebaseAuth, getFirebaseDb, getFirebaseStorage, isFirebaseConfigured } from "@/lib/firebase/client";
 
@@ -24,6 +24,9 @@ export type QuoteMessage = {
 
 export type Quote = {
   id: string;
+  code?: string;
+  orderId?: string;
+  orderCode?: string;
   customer: string;
   phone: string;
   description: string;
@@ -67,6 +70,9 @@ function formattedDate(value: string) {
 function toQuote(id: string, data: Record<string, unknown>, messages: QuoteMessage[] = []): Quote {
   return {
     id,
+    code: data.code ? String(data.code) : undefined,
+    orderId: data.orderId ? String(data.orderId) : undefined,
+    orderCode: data.orderCode ? String(data.orderCode) : undefined,
     customer: String(data.customer ?? ""),
     phone: String(data.phone ?? ""),
     description: String(data.description ?? ""),
@@ -148,13 +154,10 @@ export const useQuoteStore = create<QuoteState>((set, get) => ({
         uploadedImages.push({ id: crypto.randomUUID(), name: file.name, url: await getDownloadURL(imageRef), storagePath: imageRef.fullPath });
       }
 
-      const now = new Date();
-      const expires = new Date(now);
-      expires.setDate(expires.getDate() + 30);
-      const batch = writeBatch(getFirebaseDb());
-      batch.set(quoteRef, { ...quote, userId: user.uid, status: "new", images: uploadedImages, createdAt: now.toISOString(), expiresAt: expires.toISOString() });
-      batch.set(doc(collection(quoteRef, "messages")), { sender: "customer", text: quote.description, createdAt: now.toISOString() });
-      await batch.commit();
+      const token = await user.getIdToken();
+      const response = await fetch("/api/quotes", { method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${token}` }, body: JSON.stringify({ quoteId: quoteRef.id, quote, images: uploadedImages }) });
+      const result = await response.json() as { error?: string };
+      if (!response.ok) throw new Error(result.error ?? "No se pudo crear la cotización.");
       return quoteRef.id;
     } catch (error) {
       await Promise.all(uploadedImages.map((image) => deleteObject(ref(getFirebaseStorage(), image.storagePath)).catch(() => undefined)));

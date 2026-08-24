@@ -5,7 +5,7 @@ import { Package } from "lucide-react";
 import { formatPrice } from "@/lib/data";
 import { useOrderStore } from "@/stores/order-store";
 
-const statusLabel: Record<string, string> = { pending_payment: "Pendiente de pago", paid: "Pagado", production: "En producción", shipped: "Enviado", delivered: "Entregado", cancelled: "Cancelado" };
+const statusLabel: Record<string, string> = { pending_payment: "Pendiente de pago", paid: "Pagado", production: "En producción", ready: "Fabricado", shipped: "Enviado", delivered: "Recibido", cancelled: "Cancelado" };
 
 export function OrdersView() {
   const orders = useOrderStore((state) => state.orders);

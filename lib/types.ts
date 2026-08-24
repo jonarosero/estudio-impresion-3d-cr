@@ -14,6 +14,7 @@ export type CustomPrint = {
   description: string;
   image: string;
   status: "active" | "inactive";
+  createdAt: string;
 };
 
 export type ProductColor = {

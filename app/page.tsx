@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { HeroBanner } from "@/components/marketing/hero-banner";
 import { FeaturedProducts } from "@/components/catalog/featured-products";
 import { TiktokShowcase } from "@/components/marketing/tiktok-showcase";
+import { HomeCustomPrints } from "@/components/quotes/home-custom-prints";
 import { categories } from "@/lib/data";
 
 export default function Home() {
@@ -116,19 +116,7 @@ export default function Home() {
             <div className="mt-8 flex flex-wrap gap-3"><Link href="/personalizados" className="inline-flex w-fit items-center gap-2 rounded-full bg-[#35282d] px-6 py-3.5 text-sm font-bold text-white">Pedir mi pieza <ArrowRight size={15} /></Link><Link href="/personalizados/galeria" className="inline-flex w-fit items-center gap-2 rounded-full border border-[#cdbbc0] px-6 py-3.5 text-sm font-bold text-[#35282d]">Ver piezas creadas</Link></div>
             <p className="mt-5 text-[10px] leading-5 text-[#786970]">Envía referencias, medidas y color. Te responderemos dentro de una conversación privada.</p>
           </div>
-          <div className="grid grid-cols-2 gap-3 p-4 sm:gap-5 sm:p-7">
-            {[
-              { name: "Letrero para emprendimiento", detail: "Nombre y logotipo", image: "https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&w=900&q=85", span: "row-span-2" },
-              { name: "Recuerdos de bautizo", detail: "Serie x30", image: "https://images.unsplash.com/photo-1549989476-69a92fa57c36?auto=format&fit=crop&w=900&q=85", span: "" },
-              { name: "Organizador a medida", detail: "Para maquillaje", image: "https://images.unsplash.com/photo-1583947582886-f40ec95dd752?auto=format&fit=crop&w=900&q=85", span: "" },
-            ].map((piece) => (
-              <div key={piece.name} className={`group relative min-h-44 overflow-hidden rounded-2xl ${piece.span}`}>
-                <Image src={piece.image} alt={piece.name} fill sizes="(max-width: 1024px) 45vw, 25vw" className="object-cover transition duration-500 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#35282d]/75 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4"><p className="text-[9px] font-bold uppercase tracking-wider text-[#eccbd3]">{piece.detail}</p><p className="mt-1 font-display text-xl font-semibold text-white">{piece.name}</p></div>
-              </div>
-            ))}
-          </div>
+          <HomeCustomPrints />
         </div>
       </div></section>
     </main>

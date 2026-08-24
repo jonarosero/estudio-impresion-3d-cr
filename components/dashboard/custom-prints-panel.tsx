@@ -44,8 +44,9 @@ export function CustomPrintsPanel() {
       const image = await getDownloadURL(imageRef);
       setDraft((current) => ({ ...current, image }));
       setMessage("");
-    } catch {
-      setMessage("No se pudo subir la imagen. Confirma tus permisos de administrador.");
+    } catch (error) {
+      const reason = error instanceof Error ? ` ${error.message}` : "";
+      setMessage(`No se pudo subir la imagen.${reason}`);
     } finally {
       setSaving(false);
     }

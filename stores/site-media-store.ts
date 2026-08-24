@@ -10,6 +10,8 @@ type SiteMediaState = {
   bannerMessages: MediaItem[];
   updateTiktokVideo: (id: string, patch: Partial<MediaItem>) => void;
   updateBannerMessage: (id: string, patch: Partial<MediaItem>) => void;
+  addBannerMessage: () => void;
+  removeBannerMessage: (id: string) => void;
 };
 
 const tiktokVideos: MediaItem[] = [
@@ -32,4 +34,6 @@ export const useSiteMediaStore = create<SiteMediaState>()(persist((set) => ({
   bannerMessages,
   updateTiktokVideo: (id, patch) => set((state) => ({ tiktokVideos: update(state.tiktokVideos, id, patch) })),
   updateBannerMessage: (id, patch) => set((state) => ({ bannerMessages: update(state.bannerMessages, id, patch) })),
+  addBannerMessage: () => set((state) => ({ bannerMessages: [...state.bannerMessages, { id: crypto.randomUUID(), title: "Nuevo mensaje", image: "", href: "/catalogo" }] })),
+  removeBannerMessage: (id) => set((state) => ({ bannerMessages: state.bannerMessages.filter((item) => item.id !== id) })),
 }), { name: "jj-site-media" }));

@@ -32,7 +32,7 @@ export function FirebaseCatalogProvider({ children }: Readonly<{ children: React
       replacePromotions(snapshot.docs.map((item) => item.data() as Promotion));
     });
     const unsubscribePrints = onSnapshot(printsQuery, (snapshot) => {
-      replaceCustomPrints(snapshot.docs.map((item) => item.data() as CustomPrint));
+      replaceCustomPrints(snapshot.docs.map((item) => item.data() as CustomPrint).sort((a, b) => (b.createdAt ?? "").localeCompare(a.createdAt ?? "")));
     });
     return () => { unsubscribeProducts(); unsubscribePromotions(); unsubscribePrints(); };
   }, [account, replaceCustomPrints, replaceProducts, replacePromotions, setProductsLoaded]);

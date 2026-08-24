@@ -15,6 +15,7 @@ export function HeroBanner() {
     ...promotions.filter((item) => item.active).map((item) => ({ href: `/producto/${item.productSlug}`, image: item.image, eyebrow: `Promoción activa · ${item.code}`, title: item.title, detail: item.message, value: item.value, cta: "Ver promoción" })),
     ...messages.map((item) => ({ href: item.href, image: item.image, eyebrow: "Entregas J&J", title: item.title, detail: item.id === "local" ? "La Libertad, Salinas y cantón Santa Elena sin compra mínima." : "Calculamos la tarifa por destino y peso antes de finalizar tu pedido.", value: item.id === "local" ? "Gratis" : "Ecuador", cta: "Conocer envío" })),
   ];
+  if (!slides.length) slides.push({ href: "/catalogo", image: "", eyebrow: "J&J Estudio", title: "Objetos que cuentan algo", detail: "Conoce nuestra colección de piezas impresas en 3D.", value: "", cta: "Ver catálogo" });
   const slide = slides[slideIndex % slides.length];
 
   useEffect(() => {

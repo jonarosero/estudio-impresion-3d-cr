@@ -8,8 +8,8 @@ import type { CustomPrint } from "@/lib/types";
 type CustomPrintState = {
   prints: CustomPrint[];
   replace: (prints: CustomPrint[]) => void;
-  add: (print: Omit<CustomPrint, "id" | "status">) => Promise<void>;
-  update: (id: string, print: Omit<CustomPrint, "id" | "status">) => Promise<void>;
+  add: (print: Omit<CustomPrint, "id" | "status" | "createdAt">) => Promise<void>;
+  update: (id: string, print: Omit<CustomPrint, "id" | "status" | "createdAt">) => Promise<void>;
   remove: (id: string) => Promise<void>;
 };
 
@@ -22,6 +22,7 @@ export const useCustomPrintStore = create<CustomPrintState>()((set) => ({
       ...print,
       id,
       status: "active",
+      createdAt: new Date().toISOString(),
     });
   },
   update: async (id, print) => {
@@ -29,7 +30,7 @@ export const useCustomPrintStore = create<CustomPrintState>()((set) => ({
       ...print,
       id,
       status: "active",
-    });
+    }, { merge: true });
   },
   remove: async (id) => deleteDoc(doc(getFirebaseDb(), "customPrints", id)),
 }));

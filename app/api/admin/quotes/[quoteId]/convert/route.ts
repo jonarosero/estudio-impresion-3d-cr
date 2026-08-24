@@ -25,10 +25,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ quo
       const subtotal = Math.round(unitPrice * quantity * 100) / 100;
       const total = Math.round((subtotal + shippingCost) * 100) / 100;
       const orderRef = db.collection("orders").doc();
+      const counterRef = db.collection("counters").doc("orders");
+      const counter = await transaction.get(counterRef);
+      const sequence = Number(counter.data()?.value ?? 0) + 1;
+      const code = `P-${String(sequence).padStart(4, "0")}`;
       const now = new Date().toISOString();
-      transaction.set(orderRef, { id: orderRef.id, quoteId, userId: quote.userId, customer: quote.customer ?? "Cliente J&J", email: quote.email ?? "", phone: quote.phone ?? "", shippingAddress: "", city: "", reference: `Cotización ${quoteId}: ${quote.description ?? ""}`, lines: [{ productId: quoteId, name: "Producto personalizado", color: quote.color ?? "", quantity, unitPrice, weightGrams: 0 }], unitPrice, shippingCost, subtotal, total, currency: "USD", status: "pending_payment", paymentStatus: "pending", createdAt: now });
-      transaction.update(quoteRef, { status: "converted", orderId: orderRef.id, approvedUnitPrice: unitPrice, shippingCost, subtotal, total, currency: "USD", convertedAt: now });
-      return { orderId: orderRef.id, subtotal, total };
+      transaction.set(counterRef, { value: sequence });
+      transaction.set(orderRef, { id: orderRef.id, code, origin: "quote", quoteId, quoteCode: quote.code ?? quoteId, userId: quote.userId, customer: quote.customer ?? "Cliente J&J", email: quote.email ?? "", phone: quote.phone ?? "", shippingAddress: "", city: "", reference: `Cotización ${quote.code ?? quoteId}: ${quote.description ?? ""}`, lines: [{ productId: quoteId, name: "Producto personalizado", color: quote.color ?? "", quantity, unitPrice, weightGrams: 0 }], unitPrice, shippingCost, subtotal, total, currency: "USD", status: "pending_payment", paymentStatus: "pending", createdAt: now });
+      transaction.update(quoteRef, { status: "converted", orderId: orderRef.id, orderCode: code, approvedUnitPrice: unitPrice, shippingCost, subtotal, total, currency: "USD", convertedAt: now });
+      return { orderId: orderRef.id, code, subtotal, total };
     });
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
