@@ -95,7 +95,7 @@ export default function Home() {
               { title: "De filamento a florero", image: products[1].image },
               { title: "Probando nuevos colores", image: products[0].image },
               { title: "Modelo nuevo en camino", image: products[2].image },
-            ].map((video) => (
+            ].map((video, index) => (
               <a key={video.title} href={tiktokUrl} target="_blank" rel="noreferrer" className={`group relative min-h-[330px] overflow-hidden rounded-[22px] sm:min-h-[450px] ${index === 1 ? "translate-y-5" : ""}`}>
                 <Image src={video.image} alt={video.title} fill sizes="(max-width: 1024px) 30vw, 18vw" className="object-cover transition duration-500 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/10" />
