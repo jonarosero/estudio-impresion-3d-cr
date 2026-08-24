@@ -66,26 +66,31 @@ const nav: Array<{ id: Tab; label: string; icon: typeof Box }> = [
   { id: "configuración", label: "Configuración", icon: Settings },
 ];
 
+function isTab(value: string | null): value is Tab {
+  return nav.some((item) => item.id === value);
+}
+
 export function DashboardView() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const account = useAccountStore((state) => state.account);
   const isAccountLoading = useAccountStore((state) => state.isLoading);
   const orderId = searchParams.get("pedido");
-  const [tab, setTab] = useState<Tab>(searchParams.get("tab") === "pedidos" || orderId ? "pedidos" : "resumen");
+  const tabFromUrl = searchParams.get("tab");
+  const [tab, setTab] = useState<Tab>(orderId ? "pedidos" : isTab(tabFromUrl) ? tabFromUrl : "resumen");
   const [mobileNav, setMobileNav] = useState(false);
   const [search, setSearch] = useState("");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const orders = useOrderStore((state) => state.orders);
   const quotes = useQuoteStore((state) => state.quotes);
   const codesMigrated = useRef(false);
-  const activeTab = orderId || searchParams.get("tab") === "pedidos" ? "pedidos" : tab;
+  const activeTab = orderId ? "pedidos" : isTab(tabFromUrl) ? tabFromUrl : tab;
   const currentLabel = nav.find((item) => item.id === activeTab)?.label;
 
   function changeTab(next: Tab) {
     setTab(next);
     setMobileNav(false);
-    router.replace(next === "pedidos" ? "/dashboard?tab=pedidos" : "/dashboard");
+    router.replace(`/dashboard?tab=${encodeURIComponent(next)}`);
   }
 
   useEffect(() => {

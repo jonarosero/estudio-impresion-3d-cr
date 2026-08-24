@@ -25,7 +25,9 @@ const personalizedLinks = [
 export function Header() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [personalizationsOpen, setPersonalizationsOpen] = useState(false);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const personalizationsMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const params = useSearchParams();
   const lines = useCartStore((state) => state.lines);
@@ -44,8 +46,8 @@ export function Header() {
 
   useEffect(() => {
     const close = (event: MouseEvent) => {
-      if (!accountMenuRef.current?.contains(event.target as Node))
-        setAccountOpen(false);
+      if (!accountMenuRef.current?.contains(event.target as Node)) setAccountOpen(false);
+      if (!personalizationsMenuRef.current?.contains(event.target as Node)) setPersonalizationsOpen(false);
     };
     document.addEventListener("mousedown", close);
     return () => document.removeEventListener("mousedown", close);
@@ -91,12 +93,12 @@ export function Header() {
               className="hidden items-center gap-5 xl:flex"
               aria-label="Navegacion secundaria"
             >
-              <div className="group relative">
-                <button className={`focus-ring inline-flex items-center gap-1 whitespace-nowrap rounded px-1.5 py-1 text-[11px] font-semibold hover:text-[#9e5f72] ${personalizedLinks.some((link) => isActive(link.href)) ? "bg-[#f3e7e9] text-[#9e5f72]" : ""}`}>
+              <div ref={personalizationsMenuRef} className="relative" onMouseEnter={() => setPersonalizationsOpen(true)}>
+                <button onClick={() => setPersonalizationsOpen((open) => !open)} aria-expanded={personalizationsOpen} className={`focus-ring inline-flex items-center gap-1 whitespace-nowrap rounded px-1.5 py-1 text-[11px] font-semibold hover:text-[#9e5f72] ${personalizedLinks.some((link) => isActive(link.href)) ? "bg-[#f3e7e9] text-[#9e5f72]" : ""}`}>
                   Personalizaciones <ChevronDown size={13} />
                 </button>
-                <div className="invisible absolute left-0 top-full z-50 mt-2 w-44 rounded-xl border border-[#e5d8dc] bg-[#fffdfb] p-2 opacity-0 shadow-xl transition group-focus-within:visible group-focus-within:opacity-100 group-hover:visible group-hover:opacity-100">
-                  {personalizedLinks.map((link) => <Link key={link.href} href={link.href} className={`block rounded-lg px-3 py-2 text-[10px] font-bold hover:bg-[#f3e7e9] ${isActive(link.href) ? "text-[#9e5f72]" : ""}`}>{link.label}</Link>)}
+                <div className={`absolute left-0 top-full z-50 mt-2 w-44 rounded-xl border border-[#e5d8dc] bg-[#fffdfb] p-2 shadow-xl transition ${personalizationsOpen ? "visible opacity-100" : "invisible opacity-0"}`}>
+                  {personalizedLinks.map((link) => <Link key={link.href} href={link.href} onClick={() => setPersonalizationsOpen(false)} className={`block rounded-lg px-3 py-2 text-[10px] font-bold hover:bg-[#f3e7e9] ${isActive(link.href) ? "text-[#9e5f72]" : ""}`}>{link.label}</Link>)}
                 </div>
               </div>
               {links.slice(5).map((link) => <Link key={link.href} href={link.href} className={`focus-ring whitespace-nowrap rounded px-1.5 py-1 text-[11px] font-semibold hover:text-[#9e5f72] ${isActive(link.href) ? "bg-[#f3e7e9] text-[#9e5f72]" : ""}`}>{link.label}</Link>)}
