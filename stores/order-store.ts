@@ -17,7 +17,7 @@ export type Order = {
   shippingAddress: string;
   city: string;
   reference: string;
-  lines: Array<{ productId: string; name: string; color: string; quantity: number; unitPrice: number; weightGrams: number }>;
+  lines: Array<{ productId: string; slug?: string; name: string; color: string; quantity: number; unitPrice: number; weightGrams: number }>;
   subtotal: number;
   total: number;
   status: OrderStatus;

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
         const data = product.data();
         const quantity = Number(requested.quantity);
         if (!product.exists || data?.status !== "active" || !Number.isInteger(quantity) || quantity < 1) throw new Error("INVALID_LINE");
-        return { productId: product.id, name: String(data.name), color: String(requested.color ?? ""), quantity, unitPrice: Number(data.price), weightGrams: Number(data.weightGrams ?? 0) };
+        return { productId: product.id, slug: String(data.slug ?? ""), name: String(data.name), color: String(requested.color ?? ""), quantity, unitPrice: Number(data.price), weightGrams: Number(data.weightGrams ?? 0) };
       });
       const subtotal = lines.reduce((total, line) => total + line.unitPrice * line.quantity, 0);
       const counterRef = db.collection("counters").doc("orders");
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
       const orderRef = db.collection("orders").doc();
       const now = new Date().toISOString();
       transaction.set(counterRef, { value: sequence });
-      transaction.set(orderRef, { id: orderRef.id, code: orderCode(sequence), origin: "web", userId: user.uid, customer: String(details?.customer ?? ""), email: String(details?.email ?? user.email ?? ""), phone: String(details?.phone ?? ""), shippingAddress: String(details?.shippingAddress ?? ""), city: String(details?.city ?? ""), reference: String(details?.reference ?? ""), lines, subtotal, total: subtotal, status: "pending_payment", paymentStatus: "pending", createdAt: now });
+      transaction.set(orderRef, { id: orderRef.id, code: orderCode(sequence), origin: "web", userId: user.uid, customer: String(details?.customer ?? ""), email: String(details?.email ?? user.email ?? ""), phone: String(details?.phone ?? ""), shippingAddress: String(details?.shippingAddress ?? ""), city: String(details?.city ?? ""), reference: String(details?.reference ?? ""), lines, subtotal, total: subtotal, status: "pending_payment", paymentStatus: "pending", paymentMethod: "Por confirmar", createdAt: now });
       return { orderId: orderRef.id, code: orderCode(sequence) };
     });
     return NextResponse.json(result, { status: 201 });

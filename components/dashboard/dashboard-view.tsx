@@ -24,13 +24,14 @@ import {
   Users,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { collection, onSnapshot } from "firebase/firestore";
 import { PromotionsPanel } from "@/components/dashboard/promotions-panel";
 import { SettingsPanel } from "@/components/dashboard/settings-panel";
 import { DashboardProducts } from "@/components/dashboard/products-panel";
 import { OrdersPanel } from "@/components/dashboard/orders-panel";
+import { OrderDetail } from "@/components/dashboard/order-detail";
 import { PanelHeading, StatusBadge } from "@/components/dashboard/panel-heading";
 import { CustomPrintsPanel } from "@/components/dashboard/custom-prints-panel";
 import { MediaSettings } from "@/components/dashboard/media-settings";
@@ -67,19 +68,24 @@ const nav: Array<{ id: Tab; label: string; icon: typeof Box }> = [
 
 export function DashboardView() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const account = useAccountStore((state) => state.account);
   const isAccountLoading = useAccountStore((state) => state.isLoading);
-  const [tab, setTab] = useState<Tab>("resumen");
+  const orderId = searchParams.get("pedido");
+  const [tab, setTab] = useState<Tab>(searchParams.get("tab") === "pedidos" || orderId ? "pedidos" : "resumen");
   const [mobileNav, setMobileNav] = useState(false);
   const [search, setSearch] = useState("");
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const orders = useOrderStore((state) => state.orders);
   const quotes = useQuoteStore((state) => state.quotes);
-  const currentLabel = nav.find((item) => item.id === tab)?.label;
+  const codesMigrated = useRef(false);
+  const activeTab = orderId || searchParams.get("tab") === "pedidos" ? "pedidos" : tab;
+  const currentLabel = nav.find((item) => item.id === activeTab)?.label;
 
   function changeTab(next: Tab) {
     setTab(next);
     setMobileNav(false);
+    router.replace(next === "pedidos" ? "/dashboard?tab=pedidos" : "/dashboard");
   }
 
   useEffect(() => {
@@ -87,6 +93,12 @@ export function DashboardView() {
     if (!account) router.replace("/login?redirect=/dashboard");
     else if (account.role !== "admin") router.replace("/");
   }, [account, isAccountLoading, router]);
+
+  useEffect(() => {
+    if (codesMigrated.current || ![...orders, ...quotes].some((item) => !item.code)) return;
+    codesMigrated.current = true;
+    void getFirebaseAuth().currentUser?.getIdToken().then((token) => fetch("/api/admin/codes/backfill", { method: "POST", headers: { authorization: `Bearer ${token}` } }));
+  }, [orders, quotes]);
 
   if (isAccountLoading) return <main className="grid min-h-dvh place-items-center bg-[#f7f3f3] text-sm text-[#786970]">Verificando acceso...</main>;
   if (!account || account.role !== "admin") return null;
@@ -122,7 +134,7 @@ export function DashboardView() {
                 onClick={() => changeTab(item.id)}
                 className={cn(
                   "flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-xs font-semibold transition",
-                  tab === item.id
+                   activeTab === item.id
                     ? "bg-[#c98698] text-white"
                     : "text-white/60 hover:bg-white/5 hover:text-white",
                 )}
@@ -219,17 +231,17 @@ export function DashboardView() {
             </div>
           </header>
           <div className="p-5 sm:p-8">
-            {tab === "resumen" && (
+            {activeTab === "resumen" && (
               <Overview onOpenProducts={() => changeTab("productos")} orders={orders} />
             )}
-            {tab === "productos" && <DashboardProducts />}
-            {tab === "promociones" && <PromotionsPanel />}
-            {tab === "pedidos" && <OrdersPanel />}
-            {tab === "cotizaciones" && <QuotesPanel />}
-            {tab === "clientes" && <CustomersPanel />}
-            {tab === "contenido" && <ContentPanel />}
-            {tab === "galeria" && <CustomPrintsPanel />}
-            {tab === "configuración" && <SettingsPanel />}
+            {activeTab === "productos" && <DashboardProducts />}
+            {activeTab === "promociones" && <PromotionsPanel />}
+            {activeTab === "pedidos" && (orderId ? <OrderDetail id={orderId} /> : <OrdersPanel />)}
+            {activeTab === "cotizaciones" && <QuotesPanel />}
+            {activeTab === "clientes" && <CustomersPanel />}
+            {activeTab === "contenido" && <ContentPanel />}
+            {activeTab === "galeria" && <CustomPrintsPanel />}
+            {activeTab === "configuración" && <SettingsPanel />}
           </div>
         </section>
       </div>
@@ -363,7 +375,7 @@ function Overview({ onOpenProducts, orders }: { onOpenProducts: () => void; orde
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-[10px] font-bold">
-                    Pedido {order.id}
+                     Pedido {order.code ?? "Sin código"}
                   </p>
                   <p className="mt-1 text-[9px] text-[#786970]">
                      {order.customer} · {new Date(order.createdAt).toLocaleDateString("es-EC")}
@@ -516,7 +528,7 @@ function QuotesPanel() {
                   {selected.color}
                 </p>
               </div>
-              <StatusBadge value={statusLabels[selected.status]} />
+              <div className="flex items-center gap-2"><StatusBadge value={statusLabels[selected.status]} />{selected.status === "converted" && selected.orderId && <Link href={`/dashboard?tab=pedidos&pedido=${encodeURIComponent(selected.orderId)}`} className="rounded-full border border-[#52704b] px-3 py-1.5 text-[9px] font-bold text-[#52704b]">Ver pedido {selected.orderCode ?? ""}</Link>}</div>
             </div>
             <div className="flex-1 space-y-3 overflow-y-auto bg-[#faf8f8] p-5">
               {selected.images.length > 0 && (
@@ -601,9 +613,7 @@ function QuotesPanel() {
                 >
                   Descartar y borrar imágenes
                 </button>
-                {selected.status === "converted" && (
-                  <><Link href={selected.orderId ? `/dashboard/pedidos/${selected.orderId}` : "/dashboard"} className="rounded-full border border-[#52704b] px-3 py-2 text-[8px] font-bold text-[#52704b]">Ver pedido {selected.orderCode ?? ""}</Link><button onClick={() => setStatus(selected.id, "completed")} className="rounded-full bg-[#35282d] px-3 py-2 text-[8px] font-bold text-white">Terminar venta y borrar imágenes</button></>
-                )}
+                {selected.status === "converted" && <button onClick={() => setStatus(selected.id, "completed")} className="rounded-full bg-[#35282d] px-3 py-2 text-[8px] font-bold text-white">Terminar venta y borrar imágenes</button>}
               </div>
               {conversionMessage && <p className="mt-2 text-[9px] font-bold text-[#52704b]">{conversionMessage}</p>}
             </div>
