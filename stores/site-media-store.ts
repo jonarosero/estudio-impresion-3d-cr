@@ -2,7 +2,6 @@
 
 import { create } from "zustand";
 import { doc, setDoc } from "firebase/firestore";
-import { persist } from "zustand/middleware";
 import { getFirebaseDb } from "@/lib/firebase/client";
 
 export type MediaItem = {
@@ -87,8 +86,7 @@ function update(items: MediaItem[], id: string, patch: Partial<MediaItem>) {
 }
 
 export const useSiteMediaStore = create<SiteMediaState>()(
-  persist(
-    (set) => ({
+  (set) => ({
       tiktokVideos,
       bannerMessages,
       updateTiktokVideo: (id, patch) =>
@@ -129,7 +127,5 @@ export const useSiteMediaStore = create<SiteMediaState>()(
           { merge: true },
         );
       },
-    }),
-    { name: "jj-site-media" },
-  ),
+  }),
 );

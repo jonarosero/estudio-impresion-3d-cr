@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
 import { getFirebaseDb } from "@/lib/firebase/client";
 
 export type Promotion = {
@@ -69,7 +69,7 @@ export const usePromotionStore = create<PromotionState>()((set) => ({
   toggle: async (id) => {
     const promotion = usePromotionStore.getState().promotions.find((item) => item.id === id);
     if (!promotion) return;
-    await updateDoc(doc(getFirebaseDb(), "promotions", id), { active: !promotion.active, status: promotion.active ? "inactive" : "active" });
+    await setDoc(doc(getFirebaseDb(), "promotions", id), { ...promotion, active: !promotion.active, status: promotion.active ? "inactive" : "active" }, { merge: true });
   },
   remove: async (id) => deleteDoc(doc(getFirebaseDb(), "promotions", id)),
 }));
